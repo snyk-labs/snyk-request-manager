@@ -6,7 +6,8 @@ interface snykRequest {
     verb: string,
     url: string,
     body?: string,
-    headers?: Object
+    headers?: Object,
+    requestId?: string
 }
 
 const makeSnykRequest = async (request: snykRequest) => {

@@ -28,11 +28,15 @@ class requestsManager {
     _requestsQueue: LeakyBucketQueue<queuedRequest>
     // TODO: Type _events rather than plain obscure object structure
     _events: any
+    _retryCounter: Map<string,number>
+    _MAX_RETRY_COUNT: number
 
-    constructor() {
-        this._requestsQueue = new LeakyBucketQueue<queuedRequest>({ burstSize: 10, period: 500 });
+    constructor(burstSize = 10, period = 500, maxRetryCount = 5) {
+        this._requestsQueue = new LeakyBucketQueue<queuedRequest>({ burstSize: burstSize, period: period  });
         this._setupQueueExecutors(this._requestsQueue)
         this._events = {}
+        this._retryCounter = new Map()
+        this._MAX_RETRY_COUNT = maxRetryCount
     }
 
     _setupQueueExecutors = (queue: LeakyBucketQueue<queuedRequest>) => {
@@ -52,7 +56,16 @@ class requestsManager {
             this._emit({eventType: eventType.data, channel: request.channel, requestId: requestId, data: response })
         } catch (err) {
             let overloadedError = requestsManagerError.requestsManagerErrorOverload(err, request.channel, requestId)
-            this._emit({eventType: eventType.error, channel: request.channel, requestId: requestId, data: overloadedError })
+            let alreadyRetriedCount = this._retryCounter.get(requestId) || 0
+            if(alreadyRetriedCount >= this._MAX_RETRY_COUNT){
+                this._emit({eventType: eventType.error, channel: request.channel, requestId: requestId, data: overloadedError })
+            } else {
+                this._retryCounter.set(requestId, alreadyRetriedCount+1)
+                // Throw it back into the queue
+                this.requestStream(request.snykRequest,request.channel, request.id)
+            }
+            
+            
         }
         
     }
@@ -168,8 +181,8 @@ class requestsManager {
         })
     }
 
-    requestStream = (request: snykRequest, channel: string = 'stream'): string => {
-        let requestId = uuidv4()
+    requestStream = (request: snykRequest, channel: string = 'stream', id: string = ''): string => {
+        let requestId = id ? id : uuidv4()
         let requestForQueue: queuedRequest = {id: requestId, channel: channel, snykRequest: request}
         this._requestsQueue.enqueue(requestForQueue)
         if(!this._doesChannelHaveListeners(channel)){
