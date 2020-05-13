@@ -1,4 +1,8 @@
-import {ApiError} from './apiError'
+import {ApiError,
+        ApiAuthenticationError,
+        NotFoundError,
+        GenericError
+    } from './apiError'
 
 const requestsManagerErrorOverload = (err: Error, channel: string, requestId: string): Error => {
     switch(err?.name){
@@ -10,7 +14,6 @@ const requestsManagerErrorOverload = (err: Error, channel: string, requestId: st
             return new RequestsManagerNotFoundError(err.message, channel, requestId)
         case 'Unknown':
             return new RequestsManagerGenericError(err.message, channel, requestId)
-            break;
         default:
     }       return new RequestsManagerGenericError("Unclassified", channel, requestId)
 }
@@ -27,7 +30,7 @@ class RequestsManagerApiError extends ApiError {
     }
 }
 
-class RequestsManagerApiAuthenticationError extends ApiError {
+class RequestsManagerApiAuthenticationError extends ApiAuthenticationError {
     channel: string
     requestId: string
     constructor(message: any, channel: string, requestId: string){
@@ -39,7 +42,7 @@ class RequestsManagerApiAuthenticationError extends ApiError {
     }
 }
 
-class RequestsManagerNotFoundError extends ApiError {
+class RequestsManagerNotFoundError extends NotFoundError {
     channel: string
     requestId: string
     constructor(message: any, channel: string, requestId: string){
@@ -51,7 +54,7 @@ class RequestsManagerNotFoundError extends ApiError {
     }
 }
 
-class RequestsManagerGenericError extends ApiError {
+class RequestsManagerGenericError extends GenericError {
     channel: string
     requestId: string
     constructor(message: any, channel: string, requestId: string){

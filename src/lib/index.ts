@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import { requestsManager } from './requests/requestsManager'
+import { requestsManager } from './request/requestManager'
 
 const run = async () => {
   const manager = new requestsManager()
