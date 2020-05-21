@@ -7,15 +7,16 @@
     "format": "prettier --write '{''{lib,test}/!(fixtures)/**/*,*}.{js,ts,json,yml}'",
     "lint": "npm run format:check && npm run lint:eslint",
     "lint:eslint": "eslint --cache '{lib,test}/**/*.ts'",
-    "test": "npm run lint && npm run test:unit",
+    "test": "snyk test && npm run lint && npm run test:unit",
     "test:unit": "jest",
     "test:coverage": "npm run test:unit -- --coverage",
     "test:watch": "tsc-watch --onSuccess 'npm run test:unit'",
     "build": "tsc",
     "build-watch": "tsc -w",
-    "prepare": "npm run build",
+    "prepare": "npm run snyk-protect && npm run build",
     "snyk-test": "snyk test",
-    "pkg-binaries": "npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64 --out-path ./dist/binaries"
+    "pkg-binaries": "npx pkg . -t node12-linux-x64,node12-macos-x64,node12-win-x64 --out-path ./dist/binaries",
+    "snyk-protect": "snyk protect"
   },
   "types": "./dist/index.d.ts",
   "repository": {
@@ -40,7 +41,7 @@
     "debug": "^4.1.1",
     "leaky-bucket-queue": "0.0.2",
     "lodash": "^4.17.15",
-    "snyk": "^1.316.2",
+    "snyk": "^1.323.2",
     "snyk-config": "^3.0.0",
     "source-map-support": "^0.5.16",
     "tslib": "^1.10.0",
@@ -71,5 +72,6 @@
     "branches": [
       "master"
     ]
-  }
+  },
+  "snyk": true
 }
