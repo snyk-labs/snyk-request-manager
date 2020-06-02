@@ -47,7 +47,7 @@ Fire off your request and await it's result.
 
         // Fire off single shot request
         try{
-        let requestSync = await manager.request({verb: "GET", url: '/url'})
+        let requestSync = await requestManager.request({verb: "GET", url: '/url'})
         console.log(requestSync)
         } catch (err) {
             console.log(err)
@@ -68,7 +68,7 @@ If some requests fails, retrieve the results in the catch, requests completed su
 
         // Fire off single shot request
         try{
-        let requestSync = await manager.request({verb: "GET", url: '/url'})
+        let requestSync = await requestManager.request({verb: "GET", url: '/url'})
         console.log(requestSync)
         } catch (err) {
             console.log(err)
@@ -97,7 +97,7 @@ If some requests fails, retrieve the results in the catch, requests completed su
             }
             `
         try {
-        const results = await manager.requestBulk([
+        const results = await requestManager.requestBulk([
                                                 {verb: "GET", url: '/'},
                                                 {verb: "POST", url: '/org/:orgID/project/:projectId/issues', body: filters },
                                                 {verb: "GET", url: '/user/:id'}])
@@ -120,7 +120,7 @@ Define as many listeners as needed to use multiple parallel streams.
 If not defining custom channel name, default channel name is used in the backend `stream`
 
 
-    manager.on('data', {
+    requestManager.on('data', {
         callback:(requestId, data) => {
             console.log("response for request on test-channel ", requestId)
             console.log(data)
@@ -129,8 +129,8 @@ If not defining custom channel name, default channel name is used in the backend
     })
 
     try {
-    manager.requestStream({verb: "GET", url: '/user/:id'}))
-    manager.requestStream({verb: "GET", url: '/'}, 'test-channel')
+    requestManager.requestStream({verb: "GET", url: '/user/:id'}))
+    requestManager.requestStream({verb: "GET", url: '/'}, 'test-channel')
     } catch (err) {
         console.log(err)
     }
