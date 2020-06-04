@@ -69,7 +69,7 @@ describe('Testing Request Flows', () => {
           .toString(),
       );
 
-      expect(_.isEqual(responseSync, fixturesJSON)).toBeTruthy();
+      expect(_.isEqual(responseSync.data, fixturesJSON)).toBeTruthy();
     } catch (err) {
       throw new Error(err);
     }
@@ -91,8 +91,8 @@ describe('Testing Request Flows', () => {
           .toString(),
       );
 
-      expect(_.isEqual(responseSync1, fixturesJSON)).toBeTruthy();
-      expect(_.isEqual(responseSync2, fixturesJSON)).toBeTruthy();
+      expect(_.isEqual(responseSync1.data, fixturesJSON)).toBeTruthy();
+      expect(_.isEqual(responseSync2.data, fixturesJSON)).toBeTruthy();
     } catch (err) {
       console.log(err);
       throw new Error(err);
@@ -111,7 +111,7 @@ describe('Testing Request Flows', () => {
     try {
       // dummypath is slowed down 1sec to verify that the response array respect the order of request
       // waits for all request to be done and return an array of response in the same order.
-      const results = await requestManager.requestBulk([
+      const results: any = await requestManager.requestBulk([
         { verb: 'GET', url: '/dummypath' },
         {
           verb: 'POST',
@@ -132,9 +132,9 @@ describe('Testing Request Flows', () => {
           .toString(),
       );
 
-      expect(results[0]).toEqual('dummypath slowed down');
-      expect(_.isEqual(results[2], fixturesJSON1)).toBeTruthy();
-      expect(_.isEqual(results[1], fixturesJSON2)).toBeTruthy();
+      expect(results[0].data).toEqual('dummypath slowed down');
+      expect(_.isEqual(results[2].data, fixturesJSON1)).toBeTruthy();
+      expect(_.isEqual(results[1].data, fixturesJSON2)).toBeTruthy();
     } catch (resultsWithError) {
       console.log(resultsWithError);
     }
@@ -159,8 +159,8 @@ describe('Testing Request Flows', () => {
           .readFileSync(fixturesFolderPath + 'apiResponses/projectIssues.json')
           .toString(),
       );
-      expect(_.isEqual(resultsWithError[2], fixturesJSON2)).toBeTruthy();
-      expect(resultsWithError[1]).toEqual('dummypath slowed down');
+      expect(_.isEqual(resultsWithError[2].data, fixturesJSON2)).toBeTruthy();
+      expect(resultsWithError[1].data).toEqual('dummypath slowed down');
       expect(resultsWithError[0]).toBeInstanceOf(RequestsManagerNotFoundError);
     }
   });
@@ -197,7 +197,7 @@ describe('Testing Request Flows', () => {
         ) {
           try {
             Array.from(responseMap.values()).forEach((response, index) => {
-              expect(response).toEqual(expectedResponse[index]);
+              expect(response.data).toEqual(expectedResponse[index]);
             });
             done();
           } catch (err) {
