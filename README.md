@@ -48,7 +48,7 @@ Fire off your request and await it's result.
         // Fire off single shot request
         try{
         let requestSync = await requestManager.request({verb: "GET", url: '/url'})
-        console.log(requestSync)
+        console.log(requestSync.data)
         } catch (err) {
             console.log(err)
         }
@@ -69,7 +69,7 @@ If some requests fails, retrieve the results in the catch, requests completed su
         // Fire off single shot request
         try{
         let requestSync = await requestManager.request({verb: "GET", url: '/url'})
-        console.log(requestSync)
+        console.log(requestSync.data)
         } catch (err) {
             console.log(err)
         }
@@ -123,7 +123,7 @@ If not defining custom channel name, default channel name is used in the backend
     requestManager.on('data', {
         callback:(requestId, data) => {
             console.log("response for request on test-channel ", requestId)
-            console.log(data)
+            console.log(data.data)
         },
         channel: 'test-channel'
     })

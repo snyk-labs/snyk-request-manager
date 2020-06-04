@@ -17,16 +17,16 @@ const makeSnykRequest = async (request: snykRequest) => {
         'Authorization': 'token '+userConfig.token,
         'User-Agent': 'tech-services/snyk-prevent/1.0'
       }
-    
+
     const apiClient = axios.create({
         baseURL: userConfig.endpoint,
         responseType: 'json',
         headers: {...requestHeaders, ...request.headers }
       });
-      
+
     try {
         let res;
-        switch(request.verb){
+        switch(request.verb.toUpperCase()){
             case "GET":
                 res = await apiClient.get(request.url)
                 break;
@@ -42,8 +42,7 @@ const makeSnykRequest = async (request: snykRequest) => {
             default:
                 throw new Error.GenericError('Unexpected http command')
         }
-        return res?.data
-        
+        return res
     } catch (err) {
         switch(err.response.status){
             case 401:
@@ -56,8 +55,8 @@ const makeSnykRequest = async (request: snykRequest) => {
                 throw new Error.GenericError(err)
         }
     }
-    
-    
+
+
 }
 
 const getConfig = () => {
@@ -69,5 +68,5 @@ const getConfig = () => {
 export {
     makeSnykRequest,
     getConfig,
-    snykRequest  
-} 
+    snykRequest
+}

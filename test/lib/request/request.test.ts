@@ -71,7 +71,7 @@ describe('Test Snyk Utils make request properly', () => {
         .toString(),
     );
 
-    expect(_.isEqual(response, fixturesJSON)).toBeTruthy();
+    expect(_.isEqual(response.data, fixturesJSON)).toBeTruthy();
   });
   it('Test POST command on /', async () => {
     const bodyToSend = {
@@ -82,7 +82,7 @@ describe('Test Snyk Utils make request properly', () => {
       url: '/',
       body: JSON.stringify(bodyToSend),
     });
-    expect(_.isEqual(response, bodyToSend)).toBeTruthy();
+    expect(_.isEqual(response.data, bodyToSend)).toBeTruthy();
   });
 });
 
