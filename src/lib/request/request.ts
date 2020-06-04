@@ -44,7 +44,7 @@ const makeSnykRequest = async (request: snykRequest) => {
         }
         return res
     } catch (err) {
-        switch(err.response.status){
+        switch(err.response?.status){
             case 401:
                 throw new Error.ApiAuthenticationError(err)
             case 404:
