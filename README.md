@@ -38,7 +38,7 @@ Same thing if you need to designate a different API base url to your onprem inst
     const requestManager = new requestsManager()
 
 Default values if using `new requestsManager()`\
-    `requestsManager(snykToken = '', burstSize = 10, period = 500, maxRetryCount = 5)`
+    `snykToken = '', burstSize = 10, period = 500, maxRetryCount = 5`
 
 
 
@@ -149,15 +149,15 @@ While instantiating your manager
 
 #### Customize queue size and intervals
 ```
-const requestManager = new requestsManager('',20, 100, 10)
+const requestManager = new requestsManager({burstSize: 20, period: 100, maxRetryCount: 10})
 ```
 
 #### Customize snyk token
 ```
-const requestManager = new requestsManager('21346-1234-1234-1234')
+const requestManager = new requestsManager({snykToken:'21346-1234-1234-1234')
 ```
 
 #### Customize snyk token and queue|intervals|retries
 ```
-const requestManager = new requestsManager('21346-1234-1234-1234',20, 100, 10)
+const requestManager = new requestsManager({snykToken:'21346-1234-1234-1234', burstSize: 20, period: 100, maxRetryCount: 10})
 ```
