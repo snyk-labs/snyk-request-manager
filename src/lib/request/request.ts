@@ -10,14 +10,15 @@ interface snykRequest {
     requestId?: string
 }
 
-const makeSnykRequest = async (request: snykRequest) => {
+const makeSnykRequest = async (request: snykRequest, snykToken: string = '') => {
     const userConfig = getConfig()
+    const token = snykToken == '' ? userConfig.token : snykToken
+    
     const requestHeaders: Object = {
         'Content-Type': 'application/json',
-        'Authorization': 'token '+userConfig.token,
+        'Authorization': 'token '+ token,
         'User-Agent': 'tech-services/snyk-prevent/1.0'
-      }
-
+    }
     const apiClient = axios.create({
         baseURL: userConfig.endpoint,
         responseType: 'json',

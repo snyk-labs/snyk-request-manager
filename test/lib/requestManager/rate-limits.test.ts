@@ -55,7 +55,7 @@ beforeAll(() => {
 describe('Testing Request Rate limiting', () => {
   describe('Testing Sync requests', () => {
     it('Overall rate limiting in sync requests - burst size 1', async () => {
-      const requestManager = new requestsManager(1, 200);
+      const requestManager = new requestsManager({ burstSize: 1, period: 200 });
       const t0 = Date.now();
 
       await requestManager.request({ verb: 'GET', url: '/' });
@@ -72,7 +72,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in sync requests - burst size 1 - with slow request', async () => {
-      const requestManager = new requestsManager(1, 200);
+      const requestManager = new requestsManager({ burstSize: 1, period: 200 });
       const t0 = Date.now();
 
       await requestManager.request({ verb: 'GET', url: '/' });
@@ -89,7 +89,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in sync requests - burst size 2', async () => {
-      const requestManager = new requestsManager(2, 200);
+      const requestManager = new requestsManager({ burstSize: 2, period: 200 });
       const t0 = Date.now();
 
       await requestManager.request({ verb: 'GET', url: '/' });
@@ -106,7 +106,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in sync requests - burst size 4', async () => {
-      const requestManager = new requestsManager(4, 200);
+      const requestManager = new requestsManager({ burstSize: 4, period: 200 });
       const t0 = Date.now();
 
       await requestManager.request({ verb: 'GET', url: '/' });
@@ -123,9 +123,8 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in bulk sync requests - burst size 1', async () => {
-      const requestManager = new requestsManager(1, 200);
+      const requestManager = new requestsManager({ burstSize: 1, period: 200 });
       const t0 = Date.now();
-
       await requestManager.requestBulk([
         { verb: 'GET', url: '/' },
         { verb: 'GET', url: '/' },
@@ -142,7 +141,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in bulk sync requests - burst size 1 with slow request', async () => {
-      const requestManager = new requestsManager(1, 200);
+      const requestManager = new requestsManager({ burstSize: 1, period: 200 });
       const t0 = Date.now();
 
       await requestManager.requestBulk([
@@ -161,7 +160,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in bulk sync requests - burst size 2', async () => {
-      const requestManager = new requestsManager(2, 200);
+      const requestManager = new requestsManager({ burstSize: 2, period: 200 });
       const t0 = Date.now();
 
       await requestManager.requestBulk([
@@ -180,7 +179,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in bulk sync requests - burst size 4', async () => {
-      const requestManager = new requestsManager(4, 200);
+      const requestManager = new requestsManager({ burstSize: 4, period: 200 });
       const t0 = Date.now();
 
       await requestManager.requestBulk([
@@ -201,7 +200,7 @@ describe('Testing Request Rate limiting', () => {
 
   describe('Testing Stream requests', () => {
     it('Overall rate limiting in sync requests - burst size 1', async (done) => {
-      const requestManager = new requestsManager(1, 200);
+      const requestManager = new requestsManager({ burstSize: 1, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
@@ -263,7 +262,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in sync requests - burst size 1 with slow request', async (done) => {
-      const requestManager = new requestsManager(1, 200);
+      const requestManager = new requestsManager({ burstSize: 1, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
@@ -322,7 +321,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in sync requests - burst size 2', async (done) => {
-      const requestManager = new requestsManager(2, 200);
+      const requestManager = new requestsManager({ burstSize: 2, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
@@ -384,7 +383,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in sync requests - burst size 4', async (done) => {
-      const requestManager = new requestsManager(4, 200);
+      const requestManager = new requestsManager({ burstSize: 4, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
@@ -448,7 +447,7 @@ describe('Testing Request Rate limiting', () => {
 
   describe('Testing Stream + Sync requests', () => {
     it('Overall rate limiting in mixed (sync+stream) requests - burst size 1', async (done) => {
-      const requestManager = new requestsManager(1, 200);
+      const requestManager = new requestsManager({ burstSize: 1, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
@@ -520,7 +519,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in mixed (sync+stream) requests - burst size 2', async (done) => {
-      const requestManager = new requestsManager(2, 200);
+      const requestManager = new requestsManager({ burstSize: 2, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
@@ -592,7 +591,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in mixed (sync+stream) requests - burst size 4', async (done) => {
-      const requestManager = new requestsManager(4, 200);
+      const requestManager = new requestsManager({ burstSize: 4, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
@@ -664,7 +663,7 @@ describe('Testing Request Rate limiting', () => {
     });
 
     it('Overall rate limiting in mixed (sync+bulk+stream) requests - burst size 4', async (done) => {
-      const requestManager = new requestsManager(4, 200);
+      const requestManager = new requestsManager({ burstSize: 4, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 

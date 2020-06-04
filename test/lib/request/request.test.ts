@@ -13,8 +13,13 @@ import {
 const fixturesFolderPath = path.resolve(__dirname, '../..') + '/fixtures/';
 beforeEach(() => {
   return nock('https://snyk.io')
+    .persist()
     .get(/\/xyz/)
     .reply(404, '404')
+    .get(/\/customtoken/)
+    .reply(200, function() {
+      return this.req.headers.authorization;
+    })
     .post(/\/xyz/)
     .reply(404, '404')
     .get(/\/apierror/)
@@ -190,5 +195,25 @@ describe('Test getConfig function', () => {
   it('Get snyk api endpoint via env var', async () => {
     process.env.SNYK_API = 'API';
     expect(getConfig().endpoint).toEqual('API');
+  });
+});
+
+describe('Test snykToken override', () => {
+  it('Test GET command on / with token override', async () => {
+    process.env.SNYK_TOKEN = '123';
+    const response = await makeSnykRequest(
+      { verb: 'GET', url: '/customtoken' },
+      '0987654321',
+    );
+    expect(_.isEqual(response.data, 'token 0987654321')).toBeTruthy();
+  });
+
+  it('Test GET command on / without token override', async () => {
+    process.env.SNYK_TOKEN = '123';
+    const response = await makeSnykRequest({
+      verb: 'GET',
+      url: '/customtoken',
+    });
+    expect(_.isEqual(response.data, 'token 123')).toBeTruthy();
   });
 });
