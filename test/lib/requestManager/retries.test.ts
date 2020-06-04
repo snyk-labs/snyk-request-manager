@@ -26,7 +26,7 @@ describe('Testing Request Retries', () => {
         verb: 'POST',
         url: '/apierror',
       });
-      expect(response).toEqual(
+      expect(response.data).toEqual(
         JSON.parse(
           fs
             .readFileSync(fixturesFolderPath + 'apiResponses/general-doc.json')
@@ -64,7 +64,7 @@ describe('Testing Request Retries', () => {
         verb: 'POST',
         url: '/apierror',
       });
-      expect(response).toEqual(
+      expect(response.data).toEqual(
         JSON.parse(
           fs
             .readFileSync(fixturesFolderPath + 'apiResponses/general-doc.json')
@@ -105,7 +105,7 @@ describe('Testing Request Retries', () => {
         verb: 'POST',
         url: '/apierror',
       });
-      expect(response).toThrowError();
+      expect(response.data).toThrowError();
     } catch (err) {
       expect(err).toBeInstanceOf(RequestsManagerApiError);
       expect(hasReached5thTime).toBeTruthy();

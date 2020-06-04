@@ -42,7 +42,7 @@ const makeSnykRequest = async (request: snykRequest) => {
             default:
                 throw new Error.GenericError('Unexpected http command')
         }
-        return res?.data
+        return res //res?.data
         
     } catch (err) {
         switch(err.response.status){
