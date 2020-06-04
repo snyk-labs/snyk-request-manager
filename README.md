@@ -30,12 +30,17 @@ Following the same setup as snyk CLI, it uses the token stored in your system af
 \
 Same thing if you need to designate a different API base url to your onprem instance via `snyk config set endpoint` or `SNYK_API` to `https://yourhostname/api`
 
+>Make sure to omit the base endpoint url when you define url to hit.
+
 ### 1 - Construct your manager
 
-    const requestManager = new requestsManager(20, period = 100, maxRetryCount = 10)
+
+    const requestManager = new requestsManager()
 
 Default values if using `new requestsManager()`\
-    `requestsManager(burstSize = 10, period = 500, maxRetryCount = 5)`
+    `snykToken = '', burstSize = 10, period = 500, maxRetryCount = 5`
+
+
 
 ### 2 - Single shot request
 Fire off your request and await it's result.
@@ -137,3 +142,22 @@ If not defining custom channel name, default channel name is used in the backend
 
 
 Above will only show result of call to `/` as listener is only for 'test-channel'
+
+
+### Customize token and or snyk token
+While instantiating your manager
+
+#### Customize queue size and intervals
+```
+const requestManager = new requestsManager({burstSize: 20, period: 100, maxRetryCount: 10})
+```
+
+#### Customize snyk token
+```
+const requestManager = new requestsManager({snykToken:'21346-1234-1234-1234')
+```
+
+#### Customize snyk token and queue|intervals|retries
+```
+const requestManager = new requestsManager({snykToken:'21346-1234-1234-1234', burstSize: 20, period: 100, maxRetryCount: 10})
+```

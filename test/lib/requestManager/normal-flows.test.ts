@@ -9,6 +9,10 @@ const fixturesFolderPath = path.resolve(__dirname, '../..') + '/fixtures/';
 beforeAll(() => {
   return nock('https://snyk.io')
     .persist()
+    .get(/\/customtoken/)
+    .reply(200, function() {
+      return this.req.headers.authorization;
+    })
     .get(/\/xyz/)
     .reply(404, '404')
     .post(/\/xyz/)
@@ -54,9 +58,19 @@ beforeAll(() => {
     });
 });
 
-const requestManager = new requestsManager();
+const OLD_ENV = process.env;
+beforeEach(() => {
+  jest.resetModules(); // this is important - it clears the cache
+  process.env = { ...OLD_ENV };
+  delete process.env.SNYK_TOKEN;
+});
+
+afterEach(() => {
+  process.env = OLD_ENV;
+});
 
 describe('Testing Request Flows', () => {
+  const requestManager = new requestsManager();
   it('Single Sync request', async () => {
     try {
       const responseSync = await requestManager.request({
@@ -111,7 +125,7 @@ describe('Testing Request Flows', () => {
     try {
       // dummypath is slowed down 1sec to verify that the response array respect the order of request
       // waits for all request to be done and return an array of response in the same order.
-      const results: any = await requestManager.requestBulk([
+      const results: Array<any> = await requestManager.requestBulk([
         { verb: 'GET', url: '/dummypath' },
         {
           verb: 'POST',
@@ -244,78 +258,33 @@ describe('Testing Request Flows', () => {
       console.log(err);
     }
   });
+
+  it('Single Sync request with no token override', async () => {
+    process.env.SNYK_TOKEN = '123';
+    try {
+      const responseSync = await requestManager.request({
+        verb: 'GET',
+        url: '/customtoken',
+      });
+      expect(responseSync.data).toEqual('token 123');
+    } catch (err) {
+      throw new Error(err);
+    }
+  });
 });
 
-// const run = async () => {
-//     const manager = new requestsManager()
-//     manager.on('data', {
-//                         callback:(requestId, data) => {
-//                             console.log("response for request ", requestId)
-//                             console.log(data)
-//                         }
-//     })
+describe('Testing Request Flows', () => {
+  const requestManager = new requestsManager({ snykToken: '0987654321' });
+  it('Single Sync request with token override', async () => {
+    try {
+      const responseSync = await requestManager.request({
+        verb: 'GET',
+        url: '/customtoken',
+      });
 
-//     manager.on('error', {
-//             callback:(requestId, data) => {
-//                 console.log("response for request ", requestId)
-//                 console.log(data)
-//             }
-//     })
-
-//     try{
-//         let requestSync = await manager.request({verb: "GET", url: '/', body: ''})
-//         console.log(requestSync)
-//         console.log('done with synced request')
-//     } catch (err) {
-//         console.log('error')
-//         console.log(err)
-//     }
-
-//     manager.on('data', {
-//         callback:(requestId, data) => {
-//             console.log("response for request on test-channel ", requestId)
-//             console.log(data)
-//         },
-//         channel: 'test-channel'
-//     })
-
-//     try {
-//      console.log('1',manager.requestStream({verb: "GET", url: '/', body: ''}))
-//      console.log('1-channel',manager.requestStream({verb: "GET", url: '/', body: ''}, 'test-channel'))
-//      console.log('2',manager.requestStream({verb: "GET", url: '/', body: ''}))
-//      console.log('2-channel',manager.requestStream({verb: "GET", url: '/', body: ''}, 'test-channel'))
-//      console.log('3',manager.requestStream({verb: "GET", url: '/', body: ''}))
-//      console.log('3-channel',manager.requestStream({verb: "GET", url: '/', body: ''}, 'test-channel'))
-//     } catch (err) {
-//         console.log(err)
-//     }
-
-//     const filters = `{
-//         "filters": {
-//             "severities": [
-//                 "high",
-//                 "medium",
-//                 "low"
-//             ],
-//             "exploitMaturity": [
-//                 "mature",
-//                 "proof-of-concept",
-//                 "no-known-exploit",
-//                 "no-data"
-//             ],
-//             "types": [
-//                 "vuln",
-//                 "license"
-//             ],
-//             "ignored": false
-//         }
-//     }
-//   `
-//     try {
-//         const results = await manager.requestBulk([{verb: "GET", url: '/', body: ''}, {verb: "POST", url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues', body: filters}, {verb: "GET", url: '/', body: ''}])
-//         console.log(results)
-//     } catch(resultsWithError) {
-//         console.log(resultsWithError)
-//     }
-
-//   }
+      expect(responseSync.data).toEqual('token 0987654321');
+    } catch (err) {
+      throw new Error(err);
+    }
+  });
+});
