@@ -144,7 +144,7 @@ If not defining custom channel name, default channel name is used in the backend
 Above will only show result of call to `/` as listener is only for 'test-channel'
 
 
-### Customize token and or snyk token
+### Customize queue/retry values and or snyk token
 While instantiating your manager
 
 #### Customize queue size and intervals

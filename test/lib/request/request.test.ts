@@ -96,6 +96,7 @@ describe('Test Snyk Utils error handling/classification', () => {
     try {
       await makeSnykRequest({ verb: 'GET', url: '/xyz', body: '' });
     } catch (err) {
+      expect(err.data).toEqual(404);
       expect(err).toBeInstanceOf(NotFoundError);
     }
   });
@@ -111,6 +112,7 @@ describe('Test Snyk Utils error handling/classification', () => {
         body: JSON.stringify(bodyToSend),
       });
     } catch (err) {
+      expect(err.data).toEqual(404);
       expect(err).toBeInstanceOf(NotFoundError);
     }
   });
@@ -119,6 +121,7 @@ describe('Test Snyk Utils error handling/classification', () => {
     try {
       await makeSnykRequest({ verb: 'GET', url: '/apierror' });
     } catch (err) {
+      expect(err.data).toEqual(500);
       expect(err).toBeInstanceOf(ApiError);
     }
   });
@@ -133,6 +136,7 @@ describe('Test Snyk Utils error handling/classification', () => {
         body: JSON.stringify(bodyToSend),
       });
     } catch (err) {
+      expect(err.data).toEqual(500);
       expect(err).toBeInstanceOf(ApiError);
     }
   });
@@ -141,6 +145,7 @@ describe('Test Snyk Utils error handling/classification', () => {
     try {
       await makeSnykRequest({ verb: 'GET', url: '/apiautherror' });
     } catch (err) {
+      expect(err.data).toEqual(401);
       expect(err).toBeInstanceOf(ApiAuthenticationError);
     }
   });
@@ -155,6 +160,7 @@ describe('Test Snyk Utils error handling/classification', () => {
         body: JSON.stringify(bodyToSend),
       });
     } catch (err) {
+      expect(err.data).toEqual(401);
       expect(err).toBeInstanceOf(ApiAuthenticationError);
     }
   });
@@ -163,6 +169,7 @@ describe('Test Snyk Utils error handling/classification', () => {
     try {
       await makeSnykRequest({ verb: 'GET', url: '/genericerror' });
     } catch (err) {
+      expect(err.data).toEqual(512);
       expect(err).toBeInstanceOf(GenericError);
     }
   });
@@ -177,6 +184,7 @@ describe('Test Snyk Utils error handling/classification', () => {
         body: JSON.stringify(bodyToSend),
       });
     } catch (err) {
+      expect(err.data).toEqual(512);
       expect(err).toBeInstanceOf(GenericError);
     }
   });
