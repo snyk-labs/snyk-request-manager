@@ -17,7 +17,7 @@ const makeSnykRequest = async (request: snykRequest, snykToken: string = '') => 
     const requestHeaders: Object = {
         'Content-Type': 'application/json',
         'Authorization': 'token '+ token,
-        'User-Agent': 'tech-services/snyk-prevent/1.0'
+        'User-Agent': 'tech-services/snyk-request-manager/1.0'
     }
     const apiClient = axios.create({
         baseURL: userConfig.endpoint,
