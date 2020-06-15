@@ -49,7 +49,7 @@ const makeSnykRequest = async (request: snykRequest, snykToken: string = '') => 
             case 401:
                 throw new Error.ApiAuthenticationError(err)
             case 404:
-                throw new Error.NotFoundError("Snyk API - Could not find this resource")
+                throw new Error.NotFoundError(err)
             case 500:
                 throw new Error.ApiError(err)
             default:
