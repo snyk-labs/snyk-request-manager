@@ -10,15 +10,29 @@ interface snykRequest {
     requestId?: string
 }
 
+const getTopParentModuleName = (parent: NodeModule | null): string => {
+    if(parent == null){
+        return ''
+    }
+    if(parent?.parent){
+        return getTopParentModuleName(parent.parent)
+    } else {
+        return parent?.paths[0].split('/')[parent.paths[0].split('/').length-2]+'/' as string
+    }
+}
+
 const makeSnykRequest = async (request: snykRequest, snykToken: string = '') => {
     const userConfig = getConfig()
     const token = snykToken == '' ? userConfig.token : snykToken
     
+    let topParentModuleName = getTopParentModuleName(module.parent)
+
     const requestHeaders: Object = {
         'Content-Type': 'application/json',
         'Authorization': 'token '+ token,
-        'User-Agent': 'tech-services/snyk-request-manager/1.0'
+        'User-Agent': `${topParentModuleName}tech-services/snyk-request-manager/1.0`
     }
+    
     const apiClient = axios.create({
         baseURL: userConfig.endpoint,
         responseType: 'json',
