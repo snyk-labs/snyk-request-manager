@@ -21,7 +21,7 @@ const getTopParentModuleName = (parent: NodeModule | null): string => {
     }
 }
 
-const makeSnykRequest = async (request: snykRequest, snykToken: string = '') => {
+const makeSnykRequest = async (request: snykRequest, snykToken: string = '', userAgentPrefix:string = '') => {
     const userConfig = getConfig()
     const token = snykToken == '' ? userConfig.token : snykToken
     
@@ -30,7 +30,7 @@ const makeSnykRequest = async (request: snykRequest, snykToken: string = '') => 
     const requestHeaders: Object = {
         'Content-Type': 'application/json',
         'Authorization': 'token '+ token,
-        'User-Agent': `${topParentModuleName}tech-services/snyk-request-manager/1.0`
+        'User-Agent': `${topParentModuleName}${userAgentPrefix}tech-services/snyk-request-manager/1.0`
     }
     
     const apiClient = axios.create({
