@@ -27,7 +27,8 @@ interface requestsManagerParams {
     snykToken?: string,
     burstSize?: number,
     period?: number,
-    maxRetryCount?: number
+    maxRetryCount?: number,
+    userAgentPrefix?: string
 }
 
 class requestsManager {
@@ -37,6 +38,7 @@ class requestsManager {
     _retryCounter: Map<string,number>
     _MAX_RETRY_COUNT: number
     _snykToken: string
+    _userAgentPrefix: string
 
     //snykToken = '', burstSize = 10, period = 500, maxRetryCount = 5
     constructor(params: requestsManagerParams = {}) {
@@ -46,6 +48,7 @@ class requestsManager {
         this._retryCounter = new Map()
         this._MAX_RETRY_COUNT = params?.maxRetryCount || 5
         this._snykToken = params?.snykToken || ''
+        this._userAgentPrefix = params?.userAgentPrefix || ''
     }
 
     _setupQueueExecutors = (queue: LeakyBucketQueue<queuedRequest>) => {
@@ -61,7 +64,7 @@ class requestsManager {
     _makeRequest = async (request: queuedRequest) => {
         let requestId = request.id
         try {
-            let response = await makeSnykRequest(request.snykRequest, this._snykToken)
+            let response = await makeSnykRequest(request.snykRequest, this._snykToken, this._userAgentPrefix)
             this._emit({eventType: eventType.data, channel: request.channel, requestId: requestId, data: response })
         } catch (err) {
             let overloadedError = requestsManagerError.requestsManagerErrorOverload(err, request.channel, requestId)
