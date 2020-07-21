@@ -26,11 +26,11 @@ const makeSnykRequest = async (request: snykRequest, snykToken: string = '', use
     const token = snykToken == '' ? userConfig.token : snykToken
     
     let topParentModuleName = getTopParentModuleName(module.parent)
-
+    const userAgentPrefixChecked = userAgentPrefix != '' && !userAgentPrefix.endsWith('/') ? userAgentPrefix+'/': userAgentPrefix
     const requestHeaders: Object = {
         'Content-Type': 'application/json',
         'Authorization': 'token '+ token,
-        'User-Agent': `${topParentModuleName}${userAgentPrefix}tech-services/snyk-request-manager/1.0`
+        'User-Agent': `${topParentModuleName}${userAgentPrefixChecked}tech-services/snyk-request-manager/1.0`
     }
     
     const apiClient = axios.create({
