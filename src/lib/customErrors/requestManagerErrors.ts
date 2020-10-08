@@ -1,10 +1,14 @@
+import * as debugModule from 'debug';
+
 import {ApiError,
         ApiAuthenticationError,
         NotFoundError,
         GenericError
     } from './apiError'
+const debug = debugModule('snyk')
 
 const requestsManagerErrorOverload = (err: Error, channel: string, requestId: string): Error => {
+    debug('ERROR:', err);
     switch(err?.name){
         case 'ApiError':
             return new RequestsManagerApiError(err.message, channel, requestId)
