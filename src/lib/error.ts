@@ -1,5 +1,5 @@
 import * as chalk from 'chalk'
-const debugModule = require('debug');
+import debugModule = require('debug');
 
 
 const handleError = (error: Error) => {
