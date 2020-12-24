@@ -35,7 +35,7 @@
   "dependencies": {
     "@snyk/configstore": "^3.2.0-rc1",
     "@types/uuid": "^7.0.3",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "chalk": "^4.0.0",
     "debug": "^4.1.1",
     "leaky-bucket-queue": "0.0.2",
