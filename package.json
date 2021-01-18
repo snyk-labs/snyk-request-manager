@@ -39,10 +39,9 @@
     "chalk": "^4.0.0",
     "debug": "^4.1.1",
     "leaky-bucket-queue": "0.0.2",
-    "lodash": "^4.17.15",
+    "lodash": "4.17.20",
     "snyk": "^1.323.2",
-    "snyk-api-ts-client": "1.5.2",
-    "snyk-config": "^3.0.0",
+    "snyk-config": "^4.0.0",
     "source-map-support": "^0.5.16",
     "tslib": "^1.10.0",
     "uuid": "^8.0.0"
