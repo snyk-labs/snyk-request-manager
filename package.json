@@ -13,9 +13,8 @@
     "test:watch": "tsc-watch --onSuccess 'npm run test:unit'",
     "build": "tsc",
     "build-watch": "tsc -w",
-    "prepare": "npm run snyk-protect && npm run build",
-    "snyk-test": "snyk test",
-    "snyk-protect": "snyk protect"
+    "prepare": "npm run build",
+    "snyk-test": "snyk test"
   },
   "types": "./dist/index.d.ts",
   "repository": {
@@ -40,7 +39,6 @@
     "debug": "^4.1.1",
     "leaky-bucket-queue": "0.0.2",
     "lodash": "4.17.21",
-    "snyk": "^1.323.2",
     "snyk-config": "^4.0.0",
     "source-map-support": "^0.5.16",
     "tslib": "^1.10.0",
@@ -57,6 +55,7 @@
     "jest": "^25.1.0",
     "nock": "^12.0.3",
     "prettier": "^1.19.1",
+    "snyk": "^1.462.0",
     "ts-jest": "^25.1.0",
     "ts-node": "8.6.2",
     "tsc-watch": "^4.1.0",
