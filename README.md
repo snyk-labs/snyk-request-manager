@@ -83,6 +83,7 @@ If some requests fails, retrieve the results in the catch, requests completed su
         const filters = `{
         "filters": {
             "severities": [
+                "critical",
                 "high",
                 "medium",
                 "low"

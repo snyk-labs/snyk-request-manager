@@ -51,9 +51,10 @@ const run = async () => {
   const filters = `{
       "filters": {
           "severities": [
-              "high",
-              "medium",
-              "low"
+            "critical",  
+            "high",
+            "medium",
+            "low"
           ],
           "exploitMaturity": [
               "mature",
