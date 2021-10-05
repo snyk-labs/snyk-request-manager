@@ -7,7 +7,7 @@
     "format": "prettier --write '{''{lib,test}/!(fixtures)/**/*,*}.{js,ts,json,yml}'",
     "lint": "npm run format:check && npm run lint:eslint",
     "lint:eslint": "eslint --cache '{lib,test}/**/*.ts'",
-    "test": "snyk test && npm run lint && npm run test:unit",
+    "test": "npm run lint && npm run test:unit",
     "test:unit": "jest",
     "test:coverage": "npm run test:unit -- --coverage",
     "test:watch": "tsc-watch --onSuccess 'npm run test:unit'",
@@ -56,7 +56,6 @@
     "jest": "^25.1.0",
     "nock": "^12.0.3",
     "prettier": "^1.19.1",
-    "snyk": "^1.462.0",
     "ts-jest": "^25.1.0",
     "ts-node": "8.6.2",
     "tsc-watch": "^4.1.0",
@@ -71,6 +70,5 @@
     "branches": [
       "master"
     ]
-  },
-  "snyk": true
+  }
 }
