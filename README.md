@@ -92,6 +92,7 @@ const run = async () => {
     const filters = `{
         "filters": {
             "severities": [
+                "critical",
                 "high",
                 "medium",
                 "low"
