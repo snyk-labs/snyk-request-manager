@@ -1,6 +1,4 @@
 import 'source-map-support/register';
-import { requestsManager } from './request/requestManager'
+import { requestsManager } from './request/requestManager';
 
-export {
-    requestsManager
-} 
+export { requestsManager };

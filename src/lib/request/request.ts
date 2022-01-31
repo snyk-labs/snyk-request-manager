@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Configstore = require('@snyk/configstore');
 import axios, { AxiosResponse } from 'axios';
 import * as Error from '../customErrors/apiError';
@@ -93,4 +94,4 @@ const makeSnykRequest = async (
   }
 };
 
-export { makeSnykRequest, getConfig, SnykRequest as snykRequest };
+export { makeSnykRequest, getConfig, SnykRequest };
