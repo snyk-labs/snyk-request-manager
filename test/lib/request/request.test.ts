@@ -1,4 +1,4 @@
-import { makeSnykRequest, getConfig } from '../../../src/lib/request/request';
+import { makeSnykRequest } from '../../../src/lib/request/request';
 import * as fs from 'fs';
 import * as nock from 'nock';
 import * as _ from 'lodash';
@@ -69,7 +69,10 @@ afterEach(() => {
 
 describe('Test Snyk Utils make request properly', () => {
   it('Test GET command on /', async () => {
-    const response = await makeSnykRequest({ verb: 'GET', url: '/' });
+    const response = await makeSnykRequest(
+      { verb: 'GET', url: '/' },
+      'token123',
+    );
     const fixturesJSON = JSON.parse(
       fs
         .readFileSync(fixturesFolderPath + 'apiResponses/general-doc.json')
@@ -82,11 +85,14 @@ describe('Test Snyk Utils make request properly', () => {
     const bodyToSend = {
       testbody: {},
     };
-    const response = await makeSnykRequest({
-      verb: 'POST',
-      url: '/',
-      body: JSON.stringify(bodyToSend),
-    });
+    const response = await makeSnykRequest(
+      {
+        verb: 'POST',
+        url: '/',
+        body: JSON.stringify(bodyToSend),
+      },
+      'token123',
+    );
     expect(_.isEqual(response.data, bodyToSend)).toBeTruthy();
   });
 });
@@ -94,7 +100,7 @@ describe('Test Snyk Utils make request properly', () => {
 describe('Test Snyk Utils error handling/classification', () => {
   it('Test NotFoundError on GET command', async () => {
     try {
-      await makeSnykRequest({ verb: 'GET', url: '/xyz', body: '' });
+      await makeSnykRequest({ verb: 'GET', url: '/xyz', body: '' }, 'token123');
     } catch (err) {
       expect(err.data).toEqual(404);
       expect(err).toBeInstanceOf(NotFoundError);
@@ -106,11 +112,14 @@ describe('Test Snyk Utils error handling/classification', () => {
       const bodyToSend = {
         testbody: {},
       };
-      await makeSnykRequest({
-        verb: 'POST',
-        url: '/xyz',
-        body: JSON.stringify(bodyToSend),
-      });
+      await makeSnykRequest(
+        {
+          verb: 'POST',
+          url: '/xyz',
+          body: JSON.stringify(bodyToSend),
+        },
+        'token123',
+      );
     } catch (err) {
       expect(err.data).toEqual(404);
       expect(err).toBeInstanceOf(NotFoundError);
@@ -119,7 +128,7 @@ describe('Test Snyk Utils error handling/classification', () => {
 
   it('Test ApiError on GET command', async () => {
     try {
-      await makeSnykRequest({ verb: 'GET', url: '/apierror' });
+      await makeSnykRequest({ verb: 'GET', url: '/apierror' }, 'token123');
     } catch (err) {
       expect(err.data).toEqual(500);
       expect(err).toBeInstanceOf(ApiError);
@@ -130,11 +139,14 @@ describe('Test Snyk Utils error handling/classification', () => {
       const bodyToSend = {
         testbody: {},
       };
-      await makeSnykRequest({
-        verb: 'POST',
-        url: '/apierror',
-        body: JSON.stringify(bodyToSend),
-      });
+      await makeSnykRequest(
+        {
+          verb: 'POST',
+          url: '/apierror',
+          body: JSON.stringify(bodyToSend),
+        },
+        'token123',
+      );
     } catch (err) {
       expect(err.data).toEqual(500);
       expect(err).toBeInstanceOf(ApiError);
@@ -143,7 +155,7 @@ describe('Test Snyk Utils error handling/classification', () => {
 
   it('Test ApiAuthenticationError on GET command', async () => {
     try {
-      await makeSnykRequest({ verb: 'GET', url: '/apiautherror' });
+      await makeSnykRequest({ verb: 'GET', url: '/apiautherror' }, 'token123');
     } catch (err) {
       expect(err.data).toEqual(401);
       expect(err).toBeInstanceOf(ApiAuthenticationError);
@@ -154,11 +166,14 @@ describe('Test Snyk Utils error handling/classification', () => {
       const bodyToSend = {
         testbody: {},
       };
-      await makeSnykRequest({
-        verb: 'POST',
-        url: '/apiautherror',
-        body: JSON.stringify(bodyToSend),
-      });
+      await makeSnykRequest(
+        {
+          verb: 'POST',
+          url: '/apiautherror',
+          body: JSON.stringify(bodyToSend),
+        },
+        'token123',
+      );
     } catch (err) {
       expect(err.data).toEqual(401);
       expect(err).toBeInstanceOf(ApiAuthenticationError);
@@ -167,7 +182,7 @@ describe('Test Snyk Utils error handling/classification', () => {
 
   it('Test GenericError on GET command', async () => {
     try {
-      await makeSnykRequest({ verb: 'GET', url: '/genericerror' });
+      await makeSnykRequest({ verb: 'GET', url: '/genericerror' }, 'token123');
     } catch (err) {
       expect(err.data).toEqual(512);
       expect(err).toBeInstanceOf(GenericError);
@@ -178,50 +193,17 @@ describe('Test Snyk Utils error handling/classification', () => {
       const bodyToSend = {
         testbody: {},
       };
-      await makeSnykRequest({
-        verb: 'POST',
-        url: '/genericerror',
-        body: JSON.stringify(bodyToSend),
-      });
+      await makeSnykRequest(
+        {
+          verb: 'POST',
+          url: '/genericerror',
+          body: JSON.stringify(bodyToSend),
+        },
+        'token123',
+      );
     } catch (err) {
       expect(err.data).toEqual(512);
       expect(err).toBeInstanceOf(GenericError);
     }
-  });
-});
-
-describe('Test getConfig function', () => {
-  it('Get snyk token via env var', async () => {
-    process.env.SNYK_TOKEN = '123';
-    expect(getConfig().token).toEqual('123');
-  });
-
-  it('Get snyk.io api endpoint default', async () => {
-    expect(getConfig().endpoint).toEqual('https://snyk.io/api/v1');
-  });
-
-  it('Get snyk api endpoint via env var', async () => {
-    process.env.SNYK_API = 'API';
-    expect(getConfig().endpoint).toEqual('API');
-  });
-});
-
-describe('Test snykToken override', () => {
-  it('Test GET command on / with token override', async () => {
-    process.env.SNYK_TOKEN = '123';
-    const response = await makeSnykRequest(
-      { verb: 'GET', url: '/customtoken' },
-      '0987654321',
-    );
-    expect(_.isEqual(response.data, 'token 0987654321')).toBeTruthy();
-  });
-
-  it('Test GET command on / without token override', async () => {
-    process.env.SNYK_TOKEN = '123';
-    const response = await makeSnykRequest({
-      verb: 'GET',
-      url: '/customtoken',
-    });
-    expect(_.isEqual(response.data, 'token 123')).toBeTruthy();
   });
 });

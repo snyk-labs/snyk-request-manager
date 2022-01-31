@@ -1,4 +1,7 @@
-import { requestsManager } from '../../../src/lib/request/requestManager';
+import {
+  getConfig,
+  requestsManager,
+} from '../../../src/lib/request/requestManager';
 import * as fs from 'fs';
 import * as nock from 'nock';
 import * as _ from 'lodash';
@@ -258,9 +261,26 @@ describe('Testing Request Flows', () => {
       console.log(err);
     }
   });
+});
 
-  it('Single Sync request with no token override', async () => {
+describe('Testing Request Flows', () => {
+  it('Single Sync request with token override', async () => {
+    try {
+      const requestManager = new requestsManager({ snykToken: '0987654321' });
+      const responseSync = await requestManager.request({
+        verb: 'GET',
+        url: '/customtoken',
+      });
+
+      expect(responseSync.data).toEqual('token 0987654321');
+    } catch (err) {
+      throw new Error(err);
+    }
+  });
+
+  it('Single Sync request without token override', async () => {
     process.env.SNYK_TOKEN = '123';
+    const requestManager = new requestsManager();
     try {
       const responseSync = await requestManager.request({
         verb: 'GET',
@@ -273,18 +293,18 @@ describe('Testing Request Flows', () => {
   });
 });
 
-describe('Testing Request Flows', () => {
-  const requestManager = new requestsManager({ snykToken: '0987654321' });
-  it('Single Sync request with token override', async () => {
-    try {
-      const responseSync = await requestManager.request({
-        verb: 'GET',
-        url: '/customtoken',
-      });
+describe('Test getConfig function', () => {
+  it('Get snyk token via env var', async () => {
+    process.env.SNYK_TOKEN = '123';
+    expect(getConfig().token).toEqual('123');
+  });
 
-      expect(responseSync.data).toEqual('token 0987654321');
-    } catch (err) {
-      throw new Error(err);
-    }
+  it('Get snyk.io api endpoint default', async () => {
+    expect(getConfig().endpoint).toEqual('https://snyk.io/api/v1');
+  });
+
+  it('Get snyk api endpoint via env var', async () => {
+    process.env.SNYK_API = 'API';
+    expect(getConfig().endpoint).toEqual('API');
   });
 });

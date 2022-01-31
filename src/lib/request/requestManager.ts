@@ -1,5 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Configstore = require('@snyk/configstore');
+
 import { LeakyBucketQueue } from 'leaky-bucket-queue';
-import { SnykRequest, makeSnykRequest } from './request';
+import { SnykRequest, makeSnykRequest, DEFAULT_API } from './request';
 import { v4 as uuidv4 } from 'uuid';
 import * as requestsManagerError from '../customErrors/requestManagerErrors';
 
@@ -31,17 +34,33 @@ interface RequestsManagerParams {
   userAgentPrefix?: string;
 }
 
+const getConfig = (): { endpoint: string; token: string } => {
+  const snykApiEndpoint: string =
+    process.env.SNYK_API ||
+    new Configstore('snyk').get('endpoint') ||
+    DEFAULT_API;
+  const snykToken =
+    process.env.SNYK_TOKEN || new Configstore('snyk').get('api');
+  return { endpoint: snykApiEndpoint, token: snykToken };
+};
+
 class RequestsManager {
   _requestsQueue: LeakyBucketQueue<QueuedRequest>;
   // TODO: Type _events rather than plain obscure object structure
   _events: any;
+  _userConfig: {
+    endpoint: string;
+    token: string;
+  }; // loaded user config from configstore
+  _apiUrl: string;
   _retryCounter: Map<string, number>;
   _MAX_RETRY_COUNT: number;
   _snykToken: string;
-  _userAgentPrefix: string;
+  _userAgentPrefix?: string;
 
   //snykToken = '', burstSize = 10, period = 500, maxRetryCount = 5
   constructor(params: RequestsManagerParams = {}) {
+    this._userConfig = getConfig();
     this._requestsQueue = new LeakyBucketQueue<QueuedRequest>({
       burstSize: params?.burstSize || 10,
       period: params?.period || 500,
@@ -50,8 +69,9 @@ class RequestsManager {
     this._events = {};
     this._retryCounter = new Map();
     this._MAX_RETRY_COUNT = params?.maxRetryCount || 5;
-    this._snykToken = params?.snykToken || '';
-    this._userAgentPrefix = params?.userAgentPrefix || '';
+    this._snykToken = params?.snykToken ?? this._userConfig.token;
+    this._apiUrl = this._userConfig.endpoint;
+    this._userAgentPrefix = params?.userAgentPrefix;
   }
 
   _setupQueueExecutors = (queue: LeakyBucketQueue<QueuedRequest>): void => {
@@ -70,6 +90,7 @@ class RequestsManager {
       const response = await makeSnykRequest(
         request.snykRequest,
         this._snykToken,
+        this._apiUrl,
         this._userAgentPrefix,
       );
       this._emit({
@@ -156,7 +177,7 @@ class RequestsManager {
 
       const callbackBundle = {
         callback: (originalRequestId: string, data: any) => {
-          // TODO: couble check this is ok
+          // TODO: double check this is ok
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
           if (requestId == originalRequestId) {
             this._removeAllListenersForChannel(syncRequestChannel);
@@ -167,7 +188,7 @@ class RequestsManager {
       };
       const errorCallbackBundle = {
         callback: (originalRequestId: string, data: any) => {
-          // TODO: couble check this is ok
+          // TODO: double check this is ok
           // eslint-disable-next-line @typescript-eslint/no-use-before-define
           if (requestId == originalRequestId) {
             this._removeAllListenersForChannel(syncRequestChannel);
@@ -261,4 +282,4 @@ class RequestsManager {
   };
 }
 
-export { RequestsManager as requestsManager };
+export { RequestsManager as requestsManager, getConfig };
