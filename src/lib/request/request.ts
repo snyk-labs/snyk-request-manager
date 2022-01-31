@@ -1,8 +1,12 @@
 const Configstore = require('@snyk/configstore');
-import axios from 'axios'
+import axios from 'axios';
 import * as Error from '../customErrors/apiError'
 
-interface snykRequest {
+// Fixes issue https://github.com/axios/axios/issues/3384
+// where HTTPS over HTTP Proxy Fails with 500 handshakefailed on mcafee proxy
+import 'global-agent/bootstrap';
+
+interface SnykRequest {
     verb: string,
     url: string,
     body?: string,
@@ -21,11 +25,11 @@ const getTopParentModuleName = (parent: NodeModule | null): string => {
     }
 }
 
-const makeSnykRequest = async (request: snykRequest, snykToken: string = '', userAgentPrefix:string = '') => {
+const makeSnykRequest = async (request: SnykRequest, snykToken: string = '', userAgentPrefix:string = '') => {
     const userConfig = getConfig()
     const token = snykToken == '' ? userConfig.token : snykToken
 
-    let topParentModuleName = getTopParentModuleName(module.parent as any)
+    const topParentModuleName = getTopParentModuleName(module.parent as any)
     const userAgentPrefixChecked = userAgentPrefix != '' && !userAgentPrefix.endsWith('/') ? userAgentPrefix+'/': userAgentPrefix
     const requestHeaders: Object = {
         'Content-Type': 'application/json',
@@ -74,7 +78,7 @@ const makeSnykRequest = async (request: snykRequest, snykToken: string = '', use
 
 }
 
-const getConfig = () => {
+const getConfig = (): {endpoint: string, token: string} => {
     const snykApiEndpoint: string = process.env.SNYK_API || new Configstore('snyk').get('endpoint') || 'https://snyk.io/api/v1'
     const snykToken = process.env.SNYK_TOKEN || new Configstore('snyk').get('api')
     return {endpoint: snykApiEndpoint, token: snykToken}
@@ -83,5 +87,5 @@ const getConfig = () => {
 export {
     makeSnykRequest,
     getConfig,
-    snykRequest
+    SnykRequest as snykRequest
 }
