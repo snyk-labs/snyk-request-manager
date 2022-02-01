@@ -1,4 +1,3 @@
-const Configstore = require('@snyk/configstore');
 import axios, { AxiosResponse } from 'axios';
 import * as Error from '../customErrors/apiError';
 
@@ -6,15 +5,8 @@ import * as Error from '../customErrors/apiError';
 // where HTTPS over HTTP Proxy Fails with 500 handshakefailed on mcafee proxy
 import 'global-agent/bootstrap';
 
-const getConfig = (): { endpoint: string; token: string } => {
-  const snykApiEndpoint: string =
-    process.env.SNYK_API ||
-    new Configstore('snyk').get('endpoint') ||
-    'https://snyk.io/api/v1';
-  const snykToken =
-    process.env.SNYK_TOKEN || new Configstore('snyk').get('api');
-  return { endpoint: snykApiEndpoint, token: snykToken };
-};
+const DEFAULT_API = 'https://snyk.io/api/v1';
+
 interface SnykRequest {
   verb: string;
   url: string;
@@ -38,11 +30,9 @@ const getTopParentModuleName = (parent: NodeModule | null): string => {
 const makeSnykRequest = async (
   request: SnykRequest,
   snykToken = '',
+  apiUrl = DEFAULT_API,
   userAgentPrefix = '',
 ): Promise<AxiosResponse<any>> => {
-  const userConfig = getConfig();
-  const token = snykToken == '' ? userConfig.token : snykToken;
-
   const topParentModuleName = getTopParentModuleName(module.parent as any);
   const userAgentPrefixChecked =
     userAgentPrefix != '' && !userAgentPrefix.endsWith('/')
@@ -50,12 +40,12 @@ const makeSnykRequest = async (
       : userAgentPrefix;
   const requestHeaders: Record<string, any> = {
     'Content-Type': 'application/json',
-    Authorization: 'token ' + token,
+    Authorization: 'token ' + snykToken,
     'User-Agent': `${topParentModuleName}${userAgentPrefixChecked}tech-services/snyk-request-manager/1.0`,
   };
 
   const apiClient = axios.create({
-    baseURL: userConfig.endpoint,
+    baseURL: apiUrl,
     responseType: 'json',
     headers: { ...requestHeaders, ...request.headers },
   });
@@ -93,4 +83,4 @@ const makeSnykRequest = async (
   }
 };
 
-export { makeSnykRequest, getConfig, SnykRequest as snykRequest };
+export { makeSnykRequest, SnykRequest, DEFAULT_API };
