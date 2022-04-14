@@ -41,7 +41,7 @@
     "global-agent": "3.0.0",
     "leaky-bucket-queue": "0.0.2",
     "lodash": "4.17.21",
-    "snyk-config": "^4.0.0",
+    "snyk-config": "^5.1.0",
     "source-map-support": "^0.5.16",
     "tslib": "^1.10.0",
     "uuid": "^8.0.0"
