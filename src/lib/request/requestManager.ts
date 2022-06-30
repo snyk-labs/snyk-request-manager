@@ -4,6 +4,7 @@ const Configstore = require('@snyk/configstore');
 import { LeakyBucketQueue } from 'leaky-bucket-queue';
 import { SnykRequest, makeSnykRequest, DEFAULT_API } from './request';
 import { v4 as uuidv4 } from 'uuid';
+import { URL } from 'url';
 import * as requestsManagerError from '../customErrors/requestManagerErrors';
 
 interface QueuedRequest {
@@ -34,6 +35,12 @@ interface RequestsManagerParams {
   userAgentPrefix?: string;
 }
 
+function getRESTAPI(endpoint: string): string {
+  const apiData = new URL(endpoint);
+  // e.g 'https://api.snyk.io/rest/'
+  return new URL(`${apiData.protocol}//api.${apiData.host}/rest`).toString();
+}
+
 const getConfig = (): { endpoint: string; token: string } => {
   const snykApiEndpoint: string =
     process.env.SNYK_API ||
@@ -53,6 +60,7 @@ class RequestsManager {
     token: string;
   }; // loaded user config from configstore
   _apiUrl: string;
+  _apiUrlREST: string;
   _retryCounter: Map<string, number>;
   _MAX_RETRY_COUNT: number;
   _snykToken: string;
@@ -71,6 +79,7 @@ class RequestsManager {
     this._MAX_RETRY_COUNT = params?.maxRetryCount || 5;
     this._snykToken = params?.snykToken ?? this._userConfig.token;
     this._apiUrl = this._userConfig.endpoint;
+    this._apiUrlREST = getRESTAPI(this._userConfig.endpoint);
     this._userAgentPrefix = params?.userAgentPrefix;
   }
 
@@ -91,6 +100,7 @@ class RequestsManager {
         request.snykRequest,
         this._snykToken,
         this._apiUrl,
+        this._apiUrlREST,
         this._userAgentPrefix,
       );
       this._emit({

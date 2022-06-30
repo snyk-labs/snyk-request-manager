@@ -167,6 +167,15 @@ const requestManager = new requestsManager({burstSize: 20, period: 100, maxRetry
 const requestManager = new requestsManager({snykToken:'21346-1234-1234-1234')
 ```
 
+
+#### Customize to use REST api endpoint
+
+Each request can be opted in to use the new REST Snyk API, which defaults to 'https://api.snyk.io/rest/' and is automatically calculated from the `SNYK_API` or `endpoint` configuration by reusing the same host.
+```
+const res = await requestManager.request({verb: "GET", url: '/url', useRESTApi: true})
+```
+
+
 #### Customize snyk token and queue|intervals|retries
 
 ```
