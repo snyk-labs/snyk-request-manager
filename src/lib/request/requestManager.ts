@@ -36,8 +36,9 @@ interface RequestsManagerParams {
 }
 
 function getRESTAPI(endpoint: string): string {
-  const apiData = new URL(endpoint);
   // e.g 'https://api.snyk.io/rest/'
+  const apiData = new URL(endpoint.replace('app.', ''));
+
   return new URL(`${apiData.protocol}//api.${apiData.host}/rest`).toString();
 }
 
