@@ -6,13 +6,14 @@ import * as Error from '../customErrors/apiError';
 import 'global-agent/bootstrap';
 
 const DEFAULT_API = 'https://snyk.io/api/v1';
-
+const DEFAULT_REST_API = 'https://api.snyk.io/rest/';
 interface SnykRequest {
   verb: string;
   url: string;
   body?: string;
   headers?: Record<string, any>;
   requestId?: string;
+  useRESTApi?: boolean;
 }
 
 const getTopParentModuleName = (parent: NodeModule | null): string => {
@@ -31,6 +32,7 @@ const makeSnykRequest = async (
   request: SnykRequest,
   snykToken = '',
   apiUrl = DEFAULT_API,
+  apiUrlREST = DEFAULT_REST_API,
   userAgentPrefix = '',
 ): Promise<AxiosResponse<any>> => {
   const topParentModuleName = getTopParentModuleName(module.parent as any);
@@ -45,7 +47,7 @@ const makeSnykRequest = async (
   };
 
   const apiClient = axios.create({
-    baseURL: apiUrl,
+    baseURL: request.useRESTApi ? apiUrlREST : apiUrl,
     responseType: 'json',
     headers: { ...requestHeaders, ...request.headers },
   });

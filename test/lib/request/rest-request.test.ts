@@ -12,7 +12,7 @@ import {
 
 const fixturesFolderPath = path.resolve(__dirname, '../..') + '/fixtures/';
 beforeEach(() => {
-  return nock('https://snyk.io')
+  return nock('https://api.snyk.io')
     .persist()
     .get(/\/xyz/)
     .reply(404, '404')
@@ -37,7 +37,7 @@ beforeEach(() => {
     .post(/^(?!.*xyz).*$/)
     .reply(200, (uri, requestBody) => {
       switch (uri) {
-        case '/api/v1/':
+        case '/rest/':
           return requestBody;
           break;
         default:
@@ -46,7 +46,7 @@ beforeEach(() => {
     .get(/^(?!.*xyz).*$/)
     .reply(200, (uri) => {
       switch (uri) {
-        case '/api/v1/':
+        case '/rest/':
           return fs.readFileSync(
             fixturesFolderPath + 'apiResponses/general-doc.json',
           );
@@ -70,7 +70,7 @@ afterEach(() => {
 describe('Test Snyk Utils make request properly', () => {
   it('Test GET command on /', async () => {
     const response = await makeSnykRequest(
-      { verb: 'GET', url: '/' },
+      { verb: 'GET', url: '/', useRESTApi: true },
       'token123',
     );
     const fixturesJSON = JSON.parse(
@@ -78,7 +78,6 @@ describe('Test Snyk Utils make request properly', () => {
         .readFileSync(fixturesFolderPath + 'apiResponses/general-doc.json')
         .toString(),
     );
-
     expect(response.data).toEqual(fixturesJSON);
   });
   it('Test POST command on /', async () => {
@@ -90,6 +89,7 @@ describe('Test Snyk Utils make request properly', () => {
         verb: 'POST',
         url: '/',
         body: JSON.stringify(bodyToSend),
+        useRESTApi: true,
       },
       'token123',
     );
@@ -100,7 +100,10 @@ describe('Test Snyk Utils make request properly', () => {
 describe('Test Snyk Utils error handling/classification', () => {
   it('Test NotFoundError on GET command', async () => {
     try {
-      await makeSnykRequest({ verb: 'GET', url: '/xyz', body: '' }, 'token123');
+      await makeSnykRequest(
+        { verb: 'GET', url: '/xyz', body: '', useRESTApi: true },
+        'token123',
+      );
     } catch (err) {
       expect(err.data).toEqual(404);
       expect(err).toBeInstanceOf(NotFoundError);
@@ -117,6 +120,7 @@ describe('Test Snyk Utils error handling/classification', () => {
           verb: 'POST',
           url: '/xyz',
           body: JSON.stringify(bodyToSend),
+          useRESTApi: true,
         },
         'token123',
       );
@@ -128,7 +132,10 @@ describe('Test Snyk Utils error handling/classification', () => {
 
   it('Test ApiError on GET command', async () => {
     try {
-      await makeSnykRequest({ verb: 'GET', url: '/apierror' }, 'token123');
+      await makeSnykRequest(
+        { verb: 'GET', url: '/apierror', useRESTApi: true },
+        'token123',
+      );
     } catch (err) {
       expect(err.data).toEqual(500);
       expect(err).toBeInstanceOf(ApiError);
@@ -144,6 +151,7 @@ describe('Test Snyk Utils error handling/classification', () => {
           verb: 'POST',
           url: '/apierror',
           body: JSON.stringify(bodyToSend),
+          useRESTApi: true,
         },
         'token123',
       );
@@ -155,7 +163,10 @@ describe('Test Snyk Utils error handling/classification', () => {
 
   it('Test ApiAuthenticationError on GET command', async () => {
     try {
-      await makeSnykRequest({ verb: 'GET', url: '/apiautherror' }, 'token123');
+      await makeSnykRequest(
+        { verb: 'GET', url: '/apiautherror', useRESTApi: true },
+        'token123',
+      );
     } catch (err) {
       expect(err.data).toEqual(401);
       expect(err).toBeInstanceOf(ApiAuthenticationError);
@@ -171,6 +182,7 @@ describe('Test Snyk Utils error handling/classification', () => {
           verb: 'POST',
           url: '/apiautherror',
           body: JSON.stringify(bodyToSend),
+          useRESTApi: true,
         },
         'token123',
       );
@@ -182,7 +194,10 @@ describe('Test Snyk Utils error handling/classification', () => {
 
   it('Test GenericError on GET command', async () => {
     try {
-      await makeSnykRequest({ verb: 'GET', url: '/genericerror' }, 'token123');
+      await makeSnykRequest(
+        { verb: 'GET', url: '/genericerror', useRESTApi: true },
+        'token123',
+      );
     } catch (err) {
       expect(err.data).toEqual(512);
       expect(err).toBeInstanceOf(GenericError);
@@ -198,6 +213,7 @@ describe('Test Snyk Utils error handling/classification', () => {
           verb: 'POST',
           url: '/genericerror',
           body: JSON.stringify(bodyToSend),
+          useRESTApi: true,
         },
         'token123',
       );
