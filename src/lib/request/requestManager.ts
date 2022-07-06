@@ -117,7 +117,10 @@ class RequestsManager {
         requestId,
       );
       const alreadyRetriedCount = this._retryCounter.get(requestId) || 0;
-      if (alreadyRetriedCount >= this._MAX_RETRY_COUNT) {
+      if (
+        err?.name === 'NotFoundError' ||
+        alreadyRetriedCount >= this._MAX_RETRY_COUNT
+      ) {
         this._emit({
           eventType: eventType.error,
           channel: request.channel,
