@@ -50,6 +50,10 @@ const makeSnykRequest = async (
     baseURL: request.useRESTApi ? apiUrlREST : apiUrl,
     responseType: 'json',
     headers: { ...requestHeaders, ...request.headers },
+    transitional: {
+      clarifyTimeoutError: true,
+    },
+    timeout: 30_000, // 5 mins same as Snyk APIs
   });
 
   try {
