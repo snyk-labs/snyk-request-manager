@@ -3,6 +3,8 @@ import * as fs from 'fs';
 import * as nock from 'nock';
 import * as _ from 'lodash';
 import * as path from 'path';
+import axios from 'axios';
+
 import {
   NotFoundError,
   ApiError,
@@ -43,6 +45,15 @@ beforeEach(() => {
         default:
       }
     })
+    .patch(/^(?!.*xyz).*$/)
+    .reply(200, (uri, requestBody) => {
+      switch (uri) {
+        case '/rest/':
+          return requestBody;
+          break;
+        default:
+      }
+    })
     .get(/^(?!.*xyz).*$/)
     .reply(200, (uri) => {
       switch (uri) {
@@ -65,10 +76,12 @@ beforeEach(() => {
 
 afterEach(() => {
   process.env = OLD_ENV;
+  jest.restoreAllMocks();
 });
 
 describe('Test Snyk Utils make request properly', () => {
   it('Test GET command on /', async () => {
+    const axiosSpy = jest.spyOn(axios, 'create');
     const response = await makeSnykRequest(
       { verb: 'GET', url: '/', useRESTApi: true },
       'token123',
@@ -79,8 +92,21 @@ describe('Test Snyk Utils make request properly', () => {
         .toString(),
     );
     expect(response.data).toEqual(fixturesJSON);
+    expect(axiosSpy).toHaveBeenCalledWith({
+      baseURL: 'https://api.snyk.io/rest/',
+      headers: {
+        Authorization: 'token token123',
+        'Content-Type': 'application/json',
+        'User-Agent': 'tech-services/snyk-request-manager/1.0',
+      },
+      responseType: 'json',
+      timeout: 30000,
+      transitional: { clarifyTimeoutError: true },
+    });
   });
   it('Test POST command on /', async () => {
+    const axiosSpy = jest.spyOn(axios, 'create');
+
     const bodyToSend = {
       testbody: {},
     };
@@ -94,6 +120,45 @@ describe('Test Snyk Utils make request properly', () => {
       'token123',
     );
     expect(response.data).toEqual(bodyToSend);
+    expect(axiosSpy).toHaveBeenCalledWith({
+      baseURL: 'https://api.snyk.io/rest/',
+      headers: {
+        Authorization: 'token token123',
+        'Content-Type': 'application/vnd.api+json',
+        'User-Agent': 'tech-services/snyk-request-manager/1.0',
+      },
+      responseType: 'json',
+      timeout: 30000,
+      transitional: { clarifyTimeoutError: true },
+    });
+  });
+  it('Test PATCH command on /', async () => {
+    const axiosSpy = jest.spyOn(axios, 'create');
+
+    const bodyToSend = {
+      testbody: {},
+    };
+    const response = await makeSnykRequest(
+      {
+        verb: 'PATCH',
+        url: '/',
+        body: JSON.stringify(bodyToSend),
+        useRESTApi: true,
+      },
+      'token123',
+    );
+    expect(response.data).toEqual(bodyToSend);
+    expect(axiosSpy).toHaveBeenCalledWith({
+      baseURL: 'https://api.snyk.io/rest/',
+      headers: {
+        Authorization: 'token token123',
+        'Content-Type': 'application/vnd.api+json',
+        'User-Agent': 'tech-services/snyk-request-manager/1.0',
+      },
+      responseType: 'json',
+      timeout: 30000,
+      transitional: { clarifyTimeoutError: true },
+    });
   });
 });
 

@@ -41,7 +41,10 @@ const makeSnykRequest = async (
       ? userAgentPrefix + '/'
       : userAgentPrefix;
   const requestHeaders: Record<string, any> = {
-    'Content-Type': 'application/json',
+    'Content-Type':
+      request.useRESTApi && request.body
+        ? 'application/vnd.api+json'
+        : 'application/json',
     Authorization: 'token ' + snykToken,
     'User-Agent': `${topParentModuleName}${userAgentPrefixChecked}tech-services/snyk-request-manager/1.0`,
   };
@@ -67,6 +70,9 @@ const makeSnykRequest = async (
         break;
       case 'PUT':
         res = await apiClient.put(request.url, request.body);
+        break;
+      case 'PATCH':
+        res = await apiClient.patch(request.url, request.body);
         break;
       case 'DELETE':
         res = await apiClient.delete(request.url);
