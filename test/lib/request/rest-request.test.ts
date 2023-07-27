@@ -32,6 +32,9 @@ beforeEach(() => {
     .reply(512, '512')
     .post(/\/genericerror/)
     .reply(512, '512')
+    .get(/\/gotimeout/)
+    .delayConnection(32000)
+    .reply(504, '504')
     .get(/\/apiautherror/)
     .reply(401, '401')
     .post(/\/apiautherror/)
@@ -285,6 +288,26 @@ describe('Test Snyk Utils error handling/classification', () => {
     } catch (err) {
       expect(err.data).toEqual(512);
       expect(err).toBeInstanceOf(GenericError);
+    }
+  });
+
+  it('Test Timeout error on POST command', async () => {
+    try {
+      const bodyToSend = {
+        testbody: {},
+      };
+      await makeSnykRequest(
+        {
+          verb: 'GET',
+          url: '/gotimeout',
+          body: JSON.stringify(bodyToSend),
+          useRESTApi: true,
+        },
+        'token123',
+      );
+    } catch (err) {
+      expect(err).toBeInstanceOf(GenericError);
+      expect(err.message.config.headers.Authorization).toBe('****');
     }
   });
 });
