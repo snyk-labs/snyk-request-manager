@@ -59,4 +59,5 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
+          args: --org=cse-snyk-labs
           command: monitor
