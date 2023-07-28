@@ -291,7 +291,7 @@ describe('Test Snyk Utils error handling/classification', () => {
     }
   });
 
-  it('Test Timeout error on POST command', async () => {
+  it('Test Timeout error on GET command', async () => {
     try {
       const bodyToSend = {
         testbody: {},
