@@ -58,6 +58,11 @@ const makeSnykRequest = async (
     },
     timeout: 30_000, // 5 mins same as Snyk APIs
   });
+  // sanitize error to avoid leaking sensitive data
+  apiClient.interceptors.response.use(undefined, async (error) => {
+    error.config.headers.Authorization = '****';
+    return Promise.reject(error);
+  });
 
   try {
     let res;
