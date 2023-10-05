@@ -3,7 +3,8 @@ import * as Error from '../customErrors/apiError';
 
 // Fixes issue https://github.com/axios/axios/issues/3384
 // where HTTPS over HTTP Proxy Fails with 500 handshakefailed on mcafee proxy
-import 'global-agent/bootstrap';
+import { bootstrap } from 'global-agent';
+import { getProxyForUrl } from 'proxy-from-env';
 
 const DEFAULT_API = 'https://snyk.io/api/v1';
 const DEFAULT_REST_API = 'https://api.snyk.io/rest/';
@@ -14,6 +15,16 @@ interface SnykRequest {
   headers?: Record<string, any>;
   requestId?: string;
   useRESTApi?: boolean;
+}
+
+if (process.env.HTTP_PROXY || process.env.http_proxy) {
+  process.env.HTTP_PROXY = process.env.HTTP_PROXY || process.env.http_proxy;
+}
+if (process.env.HTTPS_PROXY || process.env.https_proxy) {
+  process.env.HTTPS_PROXY = process.env.HTTPS_PROXY || process.env.https_proxy;
+}
+if (process.env.NP_PROXY || process.env.no_proxy) {
+  process.env.NO_PROXY = process.env.NO_PROXY || process.env.no_proxy;
 }
 
 const getTopParentModuleName = (parent: NodeModule | null): string => {
@@ -35,6 +46,12 @@ const makeSnykRequest = async (
   apiUrlREST = DEFAULT_REST_API,
   userAgentPrefix = '',
 ): Promise<AxiosResponse<any>> => {
+  const proxyUri = getProxyForUrl(request.useRESTApi ? apiUrlREST : apiUrl);
+  if (proxyUri) {
+    bootstrap({
+      environmentVariableNamespace: '',
+    });
+  }
   const topParentModuleName = getTopParentModuleName(module.parent as any);
   const userAgentPrefixChecked =
     userAgentPrefix != '' && !userAgentPrefix.endsWith('/')
@@ -48,16 +65,30 @@ const makeSnykRequest = async (
     Authorization: 'token ' + snykToken,
     'User-Agent': `${topParentModuleName}${userAgentPrefixChecked}tech-services/snyk-request-manager/1.0`,
   };
+  let apiClient;
+  if (proxyUri) {
+    apiClient = axios.create({
+      baseURL: request.useRESTApi ? apiUrlREST : apiUrl,
+      responseType: 'json',
+      headers: { ...requestHeaders, ...request.headers },
+      transitional: {
+        clarifyTimeoutError: true,
+      },
+      timeout: 30_000, // 5 mins same as Snyk APIs
+      proxy: false, // disables axios built-in proxy to let bootstrap work
+    });
+  } else {
+    apiClient = axios.create({
+      baseURL: request.useRESTApi ? apiUrlREST : apiUrl,
+      responseType: 'json',
+      headers: { ...requestHeaders, ...request.headers },
+      transitional: {
+        clarifyTimeoutError: true,
+      },
+      timeout: 30_000, // 5 mins same as Snyk APIs
+    });
+  }
 
-  const apiClient = axios.create({
-    baseURL: request.useRESTApi ? apiUrlREST : apiUrl,
-    responseType: 'json',
-    headers: { ...requestHeaders, ...request.headers },
-    transitional: {
-      clarifyTimeoutError: true,
-    },
-    timeout: 30_000, // 5 mins same as Snyk APIs
-  });
   // sanitize error to avoid leaking sensitive data
   apiClient.interceptors.response.use(undefined, async (error) => {
     error.config.headers.Authorization = '****';
