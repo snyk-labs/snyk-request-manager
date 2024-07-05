@@ -12,7 +12,7 @@ import {
 
 const fixturesFolderPath = path.resolve(__dirname, '../..') + '/fixtures/';
 beforeEach(() => {
-  return nock('https://snyk.io')
+  return nock('https://api.snyk.io')
     .persist()
     .get(/\/xyz/)
     .reply(404, '404')
@@ -40,7 +40,7 @@ beforeEach(() => {
     .post(/^(?!.*xyz).*$/)
     .reply(200, (uri, requestBody) => {
       switch (uri) {
-        case '/api/v1/':
+        case '/v1/':
           return requestBody;
           break;
         default:
@@ -49,7 +49,7 @@ beforeEach(() => {
     .get(/^(?!.*xyz).*$/)
     .reply(200, (uri) => {
       switch (uri) {
-        case '/api/v1/':
+        case '/v1/':
           return fs.readFileSync(
             fixturesFolderPath + 'apiResponses/general-doc.json',
           );
