@@ -6,7 +6,7 @@ import * as Error from '../customErrors/apiError';
 import { bootstrap } from 'global-agent';
 import { getProxyForUrl } from 'proxy-from-env';
 
-const DEFAULT_API = 'https://snyk.io/api/v1';
+const DEFAULT_API = 'https://api.snyk.io/v1';
 const DEFAULT_REST_API = 'https://api.snyk.io/rest/';
 interface SnykRequest {
   verb: string;

@@ -10,10 +10,10 @@ const requestManager = new requestsManager();
 
 describe('Testing Request Retries', () => {
   it('Retry on 500 - success after 1 retry', async () => {
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(200, () => {
         return fs.readFileSync(
@@ -39,19 +39,19 @@ describe('Testing Request Retries', () => {
   });
 
   it('Retry on 500 - success after 4 retries', async () => {
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(200, () => {
         return fs.readFileSync(
@@ -78,22 +78,22 @@ describe('Testing Request Retries', () => {
 
   it('Retry on 500 - fail after 5 retries', async () => {
     let hasReached5thTime = false;
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, '500');
-    nock('https://snyk.io')
+    nock('https://api.snyk.io')
       .post(/\/apierror/)
       .reply(500, () => {
         hasReached5thTime = true;

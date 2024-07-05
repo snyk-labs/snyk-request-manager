@@ -10,7 +10,7 @@ import { RequestsManagerNotFoundError } from '../../../src/lib/customErrors/requ
 
 const fixturesFolderPath = path.resolve(__dirname, '../..') + '/fixtures/';
 beforeAll(() => {
-  return nock('https://snyk.io')
+  return nock('https://api.snyk.io')
     .persist()
     .get(/\/customtoken/)
     .reply(200, function() {
@@ -35,16 +35,16 @@ beforeAll(() => {
     .post(/^(?!.*xyz).*$/)
     .reply(200, (uri, requestBody) => {
       switch (uri) {
-        case '/api/v1/':
+        case '/v1/':
           return requestBody;
-        case '/api/v1/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues':
+        case '/v1/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues':
           return fs.readFileSync(
             fixturesFolderPath + 'apiResponses/projectIssues.json',
           );
         default:
       }
     })
-    .get(/\/api\/v1\/dummypath/)
+    .get(/\/v1\/dummypath/)
     .delay(1000)
     .reply(200, () => {
       return 'dummypath slowed down';
@@ -52,7 +52,7 @@ beforeAll(() => {
     .get(/^(?!.*xyz).*$/)
     .reply(200, (uri) => {
       switch (uri) {
-        case '/api/v1/':
+        case '/v1/':
           return fs.readFileSync(
             fixturesFolderPath + 'apiResponses/general-doc.json',
           );
@@ -188,11 +188,11 @@ describe('Testing Request Flows', () => {
     const expectedResponse = [
       {
         'what orgs can the current token access?':
-          'https://snyk.io/api/v1/orgs',
+          'https://api.snyk.io/v1/orgs',
         'what projects are owned by this org?':
-          'https://snyk.io/api/v1/org/:id/projects',
+          'https://api.snyk.io/v1/org/:id/projects',
         'test a package for issues':
-          'https://snyk.io/api/v1/test/:packageManager/:packageName/:packageVersion',
+          'https://api.snyk.io/v1/test/:packageManager/:packageName/:packageVersion',
       },
 
       'dummypath slowed down',
@@ -300,7 +300,7 @@ describe('Test getConfig function', () => {
   });
 
   it('Get snyk.io api endpoint default', async () => {
-    expect(getConfig().endpoint).toEqual('https://snyk.io/api/v1');
+    expect(getConfig().endpoint).toEqual('https://api.snyk.io/v1');
   });
 
   it('Get snyk api endpoint via env var', async () => {

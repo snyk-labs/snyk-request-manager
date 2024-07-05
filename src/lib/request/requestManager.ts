@@ -37,9 +37,13 @@ interface RequestsManagerParams {
 
 function getRESTAPI(endpoint: string): string {
   // e.g 'https://api.snyk.io/rest/'
-  const apiData = new URL(endpoint.replace('app.', ''));
-
-  return new URL(`${apiData.protocol}//api.${apiData.host}/rest`).toString();
+  const apiData = new URL(endpoint);
+  if (!apiData.host.startsWith('api.') && process.env.NODE_ENV != 'test') {
+    console.warn(
+      `${apiData.host} seems invalid and should look like https://api.snyk.io or https://api.<REGION>.snyk.io.`,
+    );
+  }
+  return new URL(`${apiData.protocol}//${apiData.host}/rest`).toString();
 }
 
 const getConfig = (): { endpoint: string; token: string } => {
