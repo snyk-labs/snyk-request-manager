@@ -183,7 +183,3 @@ const res = await requestManager.request({verb: "GET", url: '/url', useRESTApi: 
 const requestManager = new requestsManager({snykToken:'21346-1234-1234-1234', burstSize: 20, period: 100, maxRetryCount: 10})
 ```
 
-
-
-### Notes
-Axios is temporarily pinned to 0.21.4 as minor versions above contain breaking change.
