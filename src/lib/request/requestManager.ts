@@ -46,6 +46,11 @@ function getRESTAPI(endpoint: string): string {
   return new URL(`${apiData.protocol}//${apiData.host}/rest`).toString();
 }
 
+function getOauthToken(): string {
+  const oauthToken: string = process.env.OAUTH_BEARER_TOKEN || '';
+  return oauthToken;
+}
+
 const getConfig = (): { endpoint: string; token: string } => {
   const snykApiEndpoint: string =
     process.env.SNYK_API ||
@@ -69,6 +74,7 @@ class RequestsManager {
   _retryCounter: Map<string, number>;
   _MAX_RETRY_COUNT: number;
   _snykToken: string;
+  _oauthBearerToken?: string; // Optional OAuth token
   _userAgentPrefix?: string;
 
   //snykToken = '', burstSize = 10, period = 500, maxRetryCount = 5
@@ -82,6 +88,7 @@ class RequestsManager {
     this._events = {};
     this._retryCounter = new Map();
     this._MAX_RETRY_COUNT = params?.maxRetryCount || 5;
+    this._oauthBearerToken = getOauthToken();
     this._snykToken = params?.snykToken ?? this._userConfig.token;
     this._apiUrl = this._userConfig.endpoint;
     this._apiUrlREST = getRESTAPI(this._userConfig.endpoint);
@@ -101,19 +108,41 @@ class RequestsManager {
   _makeRequest = async (request: QueuedRequest): Promise<void> => {
     const requestId = request.id;
     try {
-      const response = await makeSnykRequest(
-        request.snykRequest,
-        this._snykToken,
-        this._apiUrl,
-        this._apiUrlREST,
-        this._userAgentPrefix,
-      );
-      this._emit({
-        eventType: eventType.data,
-        channel: request.channel,
-        requestId,
-        data: response,
-      });
+      // Pass oauthBearerToken if available
+      if (
+        this._oauthBearerToken != null &&
+        this._oauthBearerToken.trim() != ''
+      ) {
+        const response = await makeSnykRequest(
+          request.snykRequest,
+          '',
+          this._oauthBearerToken,
+          this._apiUrl,
+          this._apiUrlREST,
+          this._userAgentPrefix,
+        );
+        this._emit({
+          eventType: eventType.data,
+          channel: request.channel,
+          requestId,
+          data: response,
+        });
+      } else {
+        const response = await makeSnykRequest(
+          request.snykRequest,
+          this._snykToken,
+          '',
+          this._apiUrl,
+          this._apiUrlREST,
+          this._userAgentPrefix,
+        );
+        this._emit({
+          eventType: eventType.data,
+          channel: request.channel,
+          requestId,
+          data: response,
+        });
+      }
     } catch (err) {
       const overloadedError = requestsManagerError.requestsManagerErrorOverload(
         err,
