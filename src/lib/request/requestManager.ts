@@ -47,7 +47,7 @@ function getRESTAPI(endpoint: string): string {
 }
 
 function getOauthToken(): string {
-  const oauthToken: string = process.env.OAUTH_BEARER_TOKEN || '';
+  const oauthToken: string = process.env.SNYK_OAUTH_TOKEN || '';
   return oauthToken;
 }
 

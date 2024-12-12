@@ -229,3 +229,85 @@ describe('Test Snyk Utils error handling/classification', () => {
     }
   });
 });
+
+describe('Test makeSnykRequest with oauthBearerToken', () => {
+  beforeEach(() => {
+    nock.cleanAll();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
+  it('should set Bearer token in Authorization header when oauthBearerToken is provided for DEFAULT_API', async () => {
+    const testToken = 'test-oauth-token';
+    const request = {
+      verb: 'GET',
+      url: '/test-endpoint',
+    };
+
+    const scope = nock('https://api.snyk.io/v1')
+      .get('/test-endpoint')
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { success: true });
+
+    await makeSnykRequest(request, '', testToken);
+
+    expect(scope.isDone()).toBe(true);
+  });
+
+  it('should set Bearer token in Authorization header when oauthBearerToken is provided for DEFAULT_REST_API', async () => {
+    const testToken = 'test-oauth-token';
+    const request = {
+      verb: 'GET',
+      url: '/test-endpoint',
+      useRESTApi: true,
+    };
+
+    const scope = nock('https://api.snyk.io/rest/')
+      .get('/test-endpoint')
+      .matchHeader('Authorization', `Bearer ${testToken}`)
+      .reply(200, { success: true });
+
+    await makeSnykRequest(request, '', testToken);
+
+    expect(scope.isDone()).toBe(true);
+  });
+
+  it('should prioritize snykToken over oauthBearerToken when both are provided for DEFAULT_API', async () => {
+    const snykToken = 'test-snyk-token';
+    const oauthToken = 'test-oauth-token';
+    const request = {
+      verb: 'GET',
+      url: '/test-endpoint',
+    };
+
+    const scope = nock('https://api.snyk.io/v1')
+      .get('/test-endpoint')
+      .matchHeader('Authorization', `token ${snykToken}`)
+      .reply(200, { success: true });
+
+    await makeSnykRequest(request, snykToken, oauthToken);
+
+    expect(scope.isDone()).toBe(true);
+  });
+
+  it('should prioritize snykToken over oauthBearerToken when both are provided for DEFAULT_REST_API', async () => {
+    const snykToken = 'test-snyk-token';
+    const oauthToken = 'test-oauth-token';
+    const request = {
+      verb: 'GET',
+      url: '/test-endpoint',
+      useRESTApi: true,
+    };
+
+    const scope = nock('https://api.snyk.io/rest/')
+      .get('/test-endpoint')
+      .matchHeader('Authorization', `token ${snykToken}`)
+      .reply(200, { success: true });
+
+    await makeSnykRequest(request, snykToken, oauthToken);
+
+    expect(scope.isDone()).toBe(true);
+  });
+});
