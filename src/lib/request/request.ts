@@ -42,6 +42,7 @@ const getTopParentModuleName = (parent: NodeModule | null): string => {
 const makeSnykRequest = async (
   request: SnykRequest,
   snykToken = '',
+  oauthBearerToken = '',
   apiUrl = DEFAULT_API,
   apiUrlREST = DEFAULT_REST_API,
   userAgentPrefix = '',
@@ -57,12 +58,20 @@ const makeSnykRequest = async (
     userAgentPrefix != '' && !userAgentPrefix.endsWith('/')
       ? userAgentPrefix + '/'
       : userAgentPrefix;
+
+  // prioritize snykToken but use oauthBearerToken if snykToken isn't provided
+  const authorizationToken = snykToken
+    ? `token ${snykToken}`
+    : oauthBearerToken
+    ? `Bearer ${oauthBearerToken}`
+    : '';
+
   const requestHeaders: Record<string, any> = {
     'Content-Type':
       request.useRESTApi && request.body
         ? 'application/vnd.api+json'
         : 'application/json',
-    Authorization: 'token ' + snykToken,
+    Authorization: authorizationToken,
     'User-Agent': `${topParentModuleName}${userAgentPrefixChecked}tech-services/snyk-request-manager/1.0`,
   };
   let apiClient;
@@ -70,7 +79,10 @@ const makeSnykRequest = async (
     apiClient = axios.create({
       baseURL: request.useRESTApi ? apiUrlREST : apiUrl,
       responseType: 'json',
-      headers: { ...requestHeaders, ...request.headers },
+      headers: {
+        ...requestHeaders,
+        ...request.headers,
+      },
       transitional: {
         clarifyTimeoutError: true,
       },
@@ -81,7 +93,10 @@ const makeSnykRequest = async (
     apiClient = axios.create({
       baseURL: request.useRESTApi ? apiUrlREST : apiUrl,
       responseType: 'json',
-      headers: { ...requestHeaders, ...request.headers },
+      headers: {
+        ...requestHeaders,
+        ...request.headers,
+      },
       transitional: {
         clarifyTimeoutError: true,
       },
