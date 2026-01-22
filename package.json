@@ -41,7 +41,7 @@
     "debug": "^4.1.1",
     "global-agent": "3.0.0",
     "leaky-bucket-queue": "0.0.2",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "proxy-from-env": "^1.1.0",
     "snyk-config": "^5.0.1",
     "source-map-support": "^0.5.16",
