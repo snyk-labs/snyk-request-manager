@@ -13,7 +13,7 @@ beforeAll(() => {
   return nock('https://api.snyk.io')
     .persist()
     .get(/\/customtoken/)
-    .reply(200, function() {
+    .reply(200, function () {
       return this.req.headers.authorization;
     })
     .get(/\/xyz/)
@@ -132,8 +132,7 @@ describe('Testing Request Flows', () => {
         { verb: 'GET', url: '/dummypath' },
         {
           verb: 'POST',
-          url:
-            '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
           body: '{}',
         },
         { verb: 'GET', url: '/' },
@@ -165,8 +164,7 @@ describe('Testing Request Flows', () => {
         { verb: 'GET', url: '/dummypath' },
         {
           verb: 'POST',
-          url:
-            '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
           body: '{}',
         },
       ]);
@@ -182,7 +180,7 @@ describe('Testing Request Flows', () => {
     }
   });
 
-  it('Request Stream request return as soon as done', async (done) => {
+  it('Request Stream request return as soon as done', async () => {
     const responseMap = new Map();
 
     const expectedResponse = [
@@ -204,62 +202,63 @@ describe('Testing Request Flows', () => {
       ),
     ];
 
-    requestManager.on('data', {
-      callback: (requestId, data) => {
-        responseMap.set(requestId, data);
+    await new Promise<void>((resolve, reject) => {
+      requestManager.on('data', {
+        callback: (requestId, data) => {
+          responseMap.set(requestId, data);
 
-        if (
-          Array.from(responseMap.values()).filter((value) => value != '')
-            .length == 3
-        ) {
-          try {
-            Array.from(responseMap.values()).forEach((response, index) => {
-              expect(response.data).toEqual(expectedResponse[index]);
-            });
-            done();
-          } catch (err) {
-            done(err);
+          if (
+            Array.from(responseMap.values()).filter((value) => value != '')
+              .length == 3
+          ) {
+            try {
+              Array.from(responseMap.values()).forEach((response, index) => {
+                expect(response.data).toEqual(expectedResponse[index]);
+              });
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
           }
-        }
-      },
-      channel: 'test-channel',
-    });
-    requestManager.on('error', {
-      callback: () => {
-        done.fail();
-      },
-    });
+        },
+        channel: 'test-channel',
+      });
+      requestManager.on('error', {
+        callback: (error) => {
+          reject(error);
+        },
+      });
 
-    try {
-      responseMap.set(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-        '',
-      );
-      responseMap.set(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/dummypath', body: '' },
-          'test-channel',
-        ),
-        '',
-      );
-      responseMap.set(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
-          },
-          'test-channel',
-        ),
-        '',
-      );
-    } catch (err) {
-      console.log(err);
-    }
+      try {
+        responseMap.set(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+          '',
+        );
+        responseMap.set(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/dummypath', body: '' },
+            'test-channel',
+          ),
+          '',
+        );
+        responseMap.set(
+          requestManager.requestStream(
+            {
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              body: '{}',
+            },
+            'test-channel',
+          ),
+          '',
+        );
+      } catch (err) {
+        reject(err);
+      }
+    });
   });
 });
 

@@ -102,8 +102,7 @@ const run = async (): Promise<void> => {
       { verb: 'GET', url: '/', body: '' },
       {
         verb: 'POST',
-        url:
-          '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
         body: filters,
       },
       { verb: 'GET', url: '/', body: '' },

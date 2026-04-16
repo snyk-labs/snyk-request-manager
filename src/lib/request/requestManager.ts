@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Configstore = require('@snyk/configstore');
 
 import { LeakyBucketQueue } from 'leaky-bucket-queue';
@@ -205,16 +204,15 @@ class RequestsManager {
         callbackListener: QueueCallbackListenerBundle,
       ): boolean => callbackListener.channel !== channel;
 
-      this._events[typeOfEvent] = this._events[typeOfEvent].filter(
-        filterListeners,
-      );
+      this._events[typeOfEvent] =
+        this._events[typeOfEvent].filter(filterListeners);
     });
   };
 
   _doesChannelHaveListeners = (channel: string): boolean => {
-    const dataEventListeners = this._events['data'] as Array<
-      QueueCallbackListenerBundle
-    >;
+    const dataEventListeners = this._events[
+      'data'
+    ] as Array<QueueCallbackListenerBundle>;
     return dataEventListeners.some((listener) => listener.channel == channel);
   };
 
@@ -225,7 +223,7 @@ class RequestsManager {
       const callbackBundle = {
         callback: (originalRequestId: string, data: any) => {
           // TODO: double check this is ok
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+
           if (requestId == originalRequestId) {
             this._removeAllListenersForChannel(syncRequestChannel);
             resolve(data);
@@ -236,7 +234,7 @@ class RequestsManager {
       const errorCallbackBundle = {
         callback: (originalRequestId: string, data: any) => {
           // TODO: double check this is ok
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+
           if (requestId == originalRequestId) {
             this._removeAllListenersForChannel(syncRequestChannel);
             reject(data);

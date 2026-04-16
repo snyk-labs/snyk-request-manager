@@ -63,8 +63,7 @@ describe('Testing Request Rate limiting', () => {
       await requestManager.request({ verb: 'GET', url: '/' });
       await requestManager.request({
         verb: 'POST',
-        url:
-          '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
       });
       const t1 = Date.now();
       expect(t1 - t0).toBeGreaterThan(600);
@@ -80,8 +79,7 @@ describe('Testing Request Rate limiting', () => {
       await requestManager.request({ verb: 'GET', url: '/dummypath' });
       await requestManager.request({
         verb: 'POST',
-        url:
-          '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
       });
       const t1 = Date.now();
       expect(t1 - t0).toBeGreaterThan(1400);
@@ -97,8 +95,7 @@ describe('Testing Request Rate limiting', () => {
       await requestManager.request({ verb: 'GET', url: '/' });
       await requestManager.request({
         verb: 'POST',
-        url:
-          '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
       });
       const t1 = Date.now();
       expect(t1 - t0).toBeGreaterThan(400);
@@ -114,8 +111,7 @@ describe('Testing Request Rate limiting', () => {
       await requestManager.request({ verb: 'GET', url: '/' });
       await requestManager.request({
         verb: 'POST',
-        url:
-          '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
       });
       const t1 = Date.now();
 
@@ -131,8 +127,7 @@ describe('Testing Request Rate limiting', () => {
         { verb: 'GET', url: '/' },
         {
           verb: 'POST',
-          url:
-            '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
         },
       ]);
       const t1 = Date.now();
@@ -150,8 +145,7 @@ describe('Testing Request Rate limiting', () => {
         { verb: 'GET', url: '/dummypath' },
         {
           verb: 'POST',
-          url:
-            '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
         },
       ]);
       const t1 = Date.now();
@@ -169,8 +163,7 @@ describe('Testing Request Rate limiting', () => {
         { verb: 'GET', url: '/' },
         {
           verb: 'POST',
-          url:
-            '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
         },
       ]);
       const t1 = Date.now();
@@ -188,8 +181,7 @@ describe('Testing Request Rate limiting', () => {
         { verb: 'GET', url: '/' },
         {
           verb: 'POST',
-          url:
-            '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
         },
       ]);
       const t1 = Date.now();
@@ -199,254 +191,264 @@ describe('Testing Request Rate limiting', () => {
   });
 
   describe('Testing Stream requests', () => {
-    it('Overall rate limiting in sync requests - burst size 1', async (done) => {
+    it('Overall rate limiting in sync requests - burst size 1', async () => {
       const requestManager = new requestsManager({ burstSize: 1, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
-      requestManager.on('data', {
-        callback: (requestId) => {
-          responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
+      await new Promise<void>((resolve, reject) => {
+        requestManager.on('data', {
+          callback: (requestId) => {
+            responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
 
-          if (responseIdArray.length == 0) {
-            const t1 = Date.now();
-            expect(t1 - t0).toBeGreaterThan(600);
-            expect(t1 - t0).toBeLessThan(800);
-
-            done();
-          }
-        },
-        channel: 'test-channel',
-      });
-
-      requestManager.on('error', {
-        callback: () => {
-          done.fail();
-        },
-      });
-
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
-          },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
-          },
-          'test-channel',
-        ),
-      );
-    });
-
-    it('Overall rate limiting in sync requests - burst size 1 with slow request', async (done) => {
-      const requestManager = new requestsManager({ burstSize: 1, period: 200 });
-      const responseIdArray: Array<string> = [];
-      const t0 = Date.now();
-
-      requestManager.on('data', {
-        callback: (requestId) => {
-          responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
-          if (responseIdArray.length == 0) {
-            const t1 = Date.now();
-            try {
-              expect(t1 - t0).toBeGreaterThan(1200);
-              expect(t1 - t0).toBeLessThan(1400);
-            } catch (err) {
-              done(err);
+            if (responseIdArray.length == 0) {
+              const t1 = Date.now();
+              try {
+                expect(t1 - t0).toBeGreaterThan(600);
+                expect(t1 - t0).toBeLessThan(800);
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
             }
-            done();
-          }
-        },
-        channel: 'test-channel',
-      });
-
-      requestManager.on('error', {
-        callback: () => {
-          done.fail();
-        },
-      });
-
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/dummypath', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
           },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
+          channel: 'test-channel',
+        });
+
+        requestManager.on('error', {
+          callback: (error) => {
+            reject(error);
+          },
+        });
+
+        responseIdArray.push(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            {
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              body: '{}',
+            },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            {
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              body: '{}',
+            },
+            'test-channel',
+          ),
+        );
+      });
     });
 
-    it('Overall rate limiting in sync requests - burst size 2', async (done) => {
+    it('Overall rate limiting in sync requests - burst size 1 with slow request', async () => {
+      const requestManager = new requestsManager({ burstSize: 1, period: 200 });
+      const responseIdArray: Array<string> = [];
+      const t0 = Date.now();
+
+      await new Promise<void>((resolve, reject) => {
+        requestManager.on('data', {
+          callback: (requestId) => {
+            responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
+            if (responseIdArray.length == 0) {
+              const t1 = Date.now();
+              try {
+                expect(t1 - t0).toBeGreaterThan(1200);
+                expect(t1 - t0).toBeLessThan(1400);
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            }
+          },
+          channel: 'test-channel',
+        });
+
+        requestManager.on('error', {
+          callback: (error) => {
+            reject(error);
+          },
+        });
+
+        responseIdArray.push(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/dummypath', body: '' },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            {
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              body: '{}',
+            },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+        );
+      });
+    });
+
+    it('Overall rate limiting in sync requests - burst size 2', async () => {
       const requestManager = new requestsManager({ burstSize: 2, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
-      requestManager.on('data', {
-        callback: (requestId) => {
-          responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
+      await new Promise<void>((resolve, reject) => {
+        requestManager.on('data', {
+          callback: (requestId) => {
+            responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
 
-          if (responseIdArray.length == 0) {
-            const t1 = Date.now();
-            expect(t1 - t0).toBeGreaterThan(400);
-            expect(t1 - t0).toBeLessThan(600);
-
-            done();
-          }
-        },
-        channel: 'test-channel',
-      });
-
-      requestManager.on('error', {
-        callback: () => {
-          done.fail();
-        },
-      });
-
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+            if (responseIdArray.length == 0) {
+              const t1 = Date.now();
+              try {
+                expect(t1 - t0).toBeGreaterThan(400);
+                expect(t1 - t0).toBeLessThan(600);
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            }
           },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+          channel: 'test-channel',
+        });
+
+        requestManager.on('error', {
+          callback: (error) => {
+            reject(error);
           },
-          'test-channel',
-        ),
-      );
+        });
+
+        responseIdArray.push(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            {
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              body: '{}',
+            },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            {
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              body: '{}',
+            },
+            'test-channel',
+          ),
+        );
+      });
     });
 
-    it('Overall rate limiting in sync requests - burst size 4', async (done) => {
+    it('Overall rate limiting in sync requests - burst size 4', async () => {
       const requestManager = new requestsManager({ burstSize: 4, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
-      requestManager.on('data', {
-        callback: (requestId) => {
-          responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
+      await new Promise<void>((resolve, reject) => {
+        requestManager.on('data', {
+          callback: (requestId) => {
+            responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
 
-          if (responseIdArray.length == 0) {
-            const t1 = Date.now();
-            expect(t1 - t0).toBeGreaterThan(0);
-            expect(t1 - t0).toBeLessThan(200);
-
-            done();
-          }
-        },
-        channel: 'test-channel',
-      });
-
-      requestManager.on('error', {
-        callback: () => {
-          done.fail();
-        },
-      });
-
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+            if (responseIdArray.length == 0) {
+              const t1 = Date.now();
+              try {
+                expect(t1 - t0).toBeGreaterThan(0);
+                expect(t1 - t0).toBeLessThan(200);
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
+            }
           },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+          channel: 'test-channel',
+        });
+
+        requestManager.on('error', {
+          callback: (error) => {
+            reject(error);
           },
-          'test-channel',
-        ),
-      );
+        });
+
+        responseIdArray.push(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            {
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              body: '{}',
+            },
+            'test-channel',
+          ),
+        );
+        responseIdArray.push(
+          requestManager.requestStream(
+            {
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              body: '{}',
+            },
+            'test-channel',
+          ),
+        );
+      });
     });
   });
 
   describe('Testing Stream + Sync requests', () => {
-    it('Overall rate limiting in mixed (sync+stream) requests - burst size 1', async (done) => {
+    it('Overall rate limiting in mixed (sync+stream) requests - burst size 1', async () => {
       const requestManager = new requestsManager({ burstSize: 1, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
@@ -459,8 +461,8 @@ describe('Testing Request Rate limiting', () => {
       });
 
       requestManager.on('error', {
-        callback: () => {
-          done.fail();
+        callback: (error) => {
+          throw error;
         },
       });
 
@@ -480,8 +482,7 @@ describe('Testing Request Rate limiting', () => {
         requestManager.requestStream(
           {
             verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
             body: '{}',
           },
           'test-channel',
@@ -491,8 +492,7 @@ describe('Testing Request Rate limiting', () => {
         requestManager.requestStream(
           {
             verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
             body: '{}',
           },
           'test-channel',
@@ -504,21 +504,16 @@ describe('Testing Request Rate limiting', () => {
       await requestManager.request({ verb: 'GET', url: '/' });
       await requestManager.request({
         verb: 'POST',
-        url:
-          '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
       });
 
-      if (responseIdArray.length == 0) {
-        const t1 = Date.now();
-        expect(t1 - t0).toBeGreaterThan(1400);
-        expect(t1 - t0).toBeLessThan(1600);
-        done();
-      } else {
-        done.fail();
-      }
+      const t1 = Date.now();
+      expect(responseIdArray.length).toBe(0);
+      expect(t1 - t0).toBeGreaterThan(1400);
+      expect(t1 - t0).toBeLessThan(1600);
     });
 
-    it('Overall rate limiting in mixed (sync+stream) requests - burst size 2', async (done) => {
+    it('Overall rate limiting in mixed (sync+stream) requests - burst size 2', async () => {
       const requestManager = new requestsManager({ burstSize: 2, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
@@ -531,8 +526,8 @@ describe('Testing Request Rate limiting', () => {
       });
 
       requestManager.on('error', {
-        callback: () => {
-          done.fail();
+        callback: (error) => {
+          throw error;
         },
       });
 
@@ -552,8 +547,7 @@ describe('Testing Request Rate limiting', () => {
         requestManager.requestStream(
           {
             verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
             body: '{}',
           },
           'test-channel',
@@ -563,8 +557,7 @@ describe('Testing Request Rate limiting', () => {
         requestManager.requestStream(
           {
             verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
             body: '{}',
           },
           'test-channel',
@@ -576,21 +569,16 @@ describe('Testing Request Rate limiting', () => {
       await requestManager.request({ verb: 'GET', url: '/' });
       await requestManager.request({
         verb: 'POST',
-        url:
-          '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
       });
 
-      if (responseIdArray.length == 0) {
-        const t1 = Date.now();
-        expect(t1 - t0).toBeGreaterThan(1200);
-        expect(t1 - t0).toBeLessThan(1400);
-        done();
-      } else {
-        done.fail();
-      }
+      const t1 = Date.now();
+      expect(responseIdArray.length).toBe(0);
+      expect(t1 - t0).toBeGreaterThan(1200);
+      expect(t1 - t0).toBeLessThan(1400);
     });
 
-    it('Overall rate limiting in mixed (sync+stream) requests - burst size 4', async (done) => {
+    it('Overall rate limiting in mixed (sync+stream) requests - burst size 4', async () => {
       const requestManager = new requestsManager({ burstSize: 4, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
@@ -603,8 +591,8 @@ describe('Testing Request Rate limiting', () => {
       });
 
       requestManager.on('error', {
-        callback: () => {
-          done.fail();
+        callback: (error) => {
+          throw error;
         },
       });
 
@@ -624,8 +612,7 @@ describe('Testing Request Rate limiting', () => {
         requestManager.requestStream(
           {
             verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
             body: '{}',
           },
           'test-channel',
@@ -635,8 +622,7 @@ describe('Testing Request Rate limiting', () => {
         requestManager.requestStream(
           {
             verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
             body: '{}',
           },
           'test-channel',
@@ -648,21 +634,16 @@ describe('Testing Request Rate limiting', () => {
       await requestManager.request({ verb: 'GET', url: '/' });
       await requestManager.request({
         verb: 'POST',
-        url:
-          '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
       });
 
-      if (responseIdArray.length == 0) {
-        const t1 = Date.now();
-        expect(t1 - t0).toBeGreaterThan(800);
-        expect(t1 - t0).toBeLessThan(1000);
-        done();
-      } else {
-        done.fail();
-      }
+      const t1 = Date.now();
+      expect(responseIdArray.length).toBe(0);
+      expect(t1 - t0).toBeGreaterThan(800);
+      expect(t1 - t0).toBeLessThan(1000);
     });
 
-    it('Overall rate limiting in mixed (sync+bulk+stream) requests - burst size 4', async (done) => {
+    it('Overall rate limiting in mixed (sync+bulk+stream) requests - burst size 4', async () => {
       const requestManager = new requestsManager({ burstSize: 4, period: 200 });
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
@@ -675,8 +656,8 @@ describe('Testing Request Rate limiting', () => {
       });
 
       requestManager.on('error', {
-        callback: () => {
-          done.fail();
+        callback: (error) => {
+          throw error;
         },
       });
 
@@ -696,8 +677,7 @@ describe('Testing Request Rate limiting', () => {
         requestManager.requestStream(
           {
             verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
             body: '{}',
           },
           'test-channel',
@@ -707,8 +687,7 @@ describe('Testing Request Rate limiting', () => {
         requestManager.requestStream(
           {
             verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
             body: '{}',
           },
           'test-channel',
@@ -720,8 +699,7 @@ describe('Testing Request Rate limiting', () => {
       await requestManager.request({ verb: 'GET', url: '/' });
       await requestManager.request({
         verb: 'POST',
-        url:
-          '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
       });
 
       await requestManager.requestBulk([
@@ -730,19 +708,14 @@ describe('Testing Request Rate limiting', () => {
         { verb: 'GET', url: '/' },
         {
           verb: 'POST',
-          url:
-            '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
         },
       ]);
 
-      if (responseIdArray.length == 0) {
-        const t1 = Date.now();
-        expect(t1 - t0).toBeGreaterThan(1600);
-        expect(t1 - t0).toBeLessThan(1800);
-        done();
-      } else {
-        done.fail();
-      }
+      const t1 = Date.now();
+      expect(responseIdArray.length).toBe(0);
+      expect(t1 - t0).toBeGreaterThan(1600);
+      expect(t1 - t0).toBeLessThan(1800);
     });
   });
   // it('Burst size respected', async () => {

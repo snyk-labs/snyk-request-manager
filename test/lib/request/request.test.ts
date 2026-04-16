@@ -17,7 +17,7 @@ beforeEach(() => {
     .get(/\/xyz/)
     .reply(404, '404')
     .get(/\/customtoken/)
-    .reply(200, function() {
+    .reply(200, function () {
       return this.req.headers.authorization;
     })
     .post(/\/xyz/)

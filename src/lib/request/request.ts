@@ -63,8 +63,8 @@ const makeSnykRequest = async (
   const authorizationToken = snykToken
     ? `token ${snykToken}`
     : oauthBearerToken
-    ? `Bearer ${oauthBearerToken}`
-    : '';
+      ? `Bearer ${oauthBearerToken}`
+      : '';
 
   const requestHeaders: Record<string, any> = {
     'Content-Type':
