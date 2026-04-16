@@ -453,64 +453,73 @@ describe('Testing Request Rate limiting', () => {
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
-      requestManager.on('data', {
-        callback: (requestId) => {
-          responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
-        },
-        channel: 'test-channel',
-      });
-
-      requestManager.on('error', {
-        callback: (error) => {
-          throw error;
-        },
-      });
-
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+      await new Promise<void>((resolve, reject) => {
+        requestManager.on('data', {
+          callback: (requestId) => {
+            responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
           },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+          channel: 'test-channel',
+        });
+
+        requestManager.on('error', {
+          callback: (error) => {
+            reject(error);
           },
-          'test-channel',
-        ),
-      );
+        });
 
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({
-        verb: 'POST',
-        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        void (async () => {
+          try {
+            responseIdArray.push(
+              requestManager.requestStream(
+                { verb: 'GET', url: '/', body: '' },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                { verb: 'GET', url: '/', body: '' },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                {
+                  verb: 'POST',
+                  url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+                  body: '{}',
+                },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                {
+                  verb: 'POST',
+                  url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+                  body: '{}',
+                },
+                'test-channel',
+              ),
+            );
+
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            });
+
+            const t1 = Date.now();
+            expect(responseIdArray.length).toBe(0);
+            expect(t1 - t0).toBeGreaterThan(1400);
+            expect(t1 - t0).toBeLessThan(1600);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        })();
       });
-
-      const t1 = Date.now();
-      expect(responseIdArray.length).toBe(0);
-      expect(t1 - t0).toBeGreaterThan(1400);
-      expect(t1 - t0).toBeLessThan(1600);
     });
 
     it('Overall rate limiting in mixed (sync+stream) requests - burst size 2', async () => {
@@ -518,64 +527,73 @@ describe('Testing Request Rate limiting', () => {
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
-      requestManager.on('data', {
-        callback: (requestId) => {
-          responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
-        },
-        channel: 'test-channel',
-      });
-
-      requestManager.on('error', {
-        callback: (error) => {
-          throw error;
-        },
-      });
-
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+      await new Promise<void>((resolve, reject) => {
+        requestManager.on('data', {
+          callback: (requestId) => {
+            responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
           },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+          channel: 'test-channel',
+        });
+
+        requestManager.on('error', {
+          callback: (error) => {
+            reject(error);
           },
-          'test-channel',
-        ),
-      );
+        });
 
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({
-        verb: 'POST',
-        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        void (async () => {
+          try {
+            responseIdArray.push(
+              requestManager.requestStream(
+                { verb: 'GET', url: '/', body: '' },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                { verb: 'GET', url: '/', body: '' },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                {
+                  verb: 'POST',
+                  url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+                  body: '{}',
+                },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                {
+                  verb: 'POST',
+                  url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+                  body: '{}',
+                },
+                'test-channel',
+              ),
+            );
+
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            });
+
+            const t1 = Date.now();
+            expect(responseIdArray.length).toBe(0);
+            expect(t1 - t0).toBeGreaterThan(1200);
+            expect(t1 - t0).toBeLessThan(1400);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        })();
       });
-
-      const t1 = Date.now();
-      expect(responseIdArray.length).toBe(0);
-      expect(t1 - t0).toBeGreaterThan(1200);
-      expect(t1 - t0).toBeLessThan(1400);
     });
 
     it('Overall rate limiting in mixed (sync+stream) requests - burst size 4', async () => {
@@ -583,64 +601,73 @@ describe('Testing Request Rate limiting', () => {
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
-      requestManager.on('data', {
-        callback: (requestId) => {
-          responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
-        },
-        channel: 'test-channel',
-      });
-
-      requestManager.on('error', {
-        callback: (error) => {
-          throw error;
-        },
-      });
-
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+      await new Promise<void>((resolve, reject) => {
+        requestManager.on('data', {
+          callback: (requestId) => {
+            responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
           },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+          channel: 'test-channel',
+        });
+
+        requestManager.on('error', {
+          callback: (error) => {
+            reject(error);
           },
-          'test-channel',
-        ),
-      );
+        });
 
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({
-        verb: 'POST',
-        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        void (async () => {
+          try {
+            responseIdArray.push(
+              requestManager.requestStream(
+                { verb: 'GET', url: '/', body: '' },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                { verb: 'GET', url: '/', body: '' },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                {
+                  verb: 'POST',
+                  url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+                  body: '{}',
+                },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                {
+                  verb: 'POST',
+                  url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+                  body: '{}',
+                },
+                'test-channel',
+              ),
+            );
+
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            });
+
+            const t1 = Date.now();
+            expect(responseIdArray.length).toBe(0);
+            expect(t1 - t0).toBeGreaterThan(800);
+            expect(t1 - t0).toBeLessThan(1000);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        })();
       });
-
-      const t1 = Date.now();
-      expect(responseIdArray.length).toBe(0);
-      expect(t1 - t0).toBeGreaterThan(800);
-      expect(t1 - t0).toBeLessThan(1000);
     });
 
     it('Overall rate limiting in mixed (sync+bulk+stream) requests - burst size 4', async () => {
@@ -648,74 +675,83 @@ describe('Testing Request Rate limiting', () => {
       const responseIdArray: Array<string> = [];
       const t0 = Date.now();
 
-      requestManager.on('data', {
-        callback: (requestId) => {
-          responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
-        },
-        channel: 'test-channel',
-      });
-
-      requestManager.on('error', {
-        callback: (error) => {
-          throw error;
-        },
-      });
-
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+      await new Promise<void>((resolve, reject) => {
+        requestManager.on('data', {
+          callback: (requestId) => {
+            responseIdArray.splice(responseIdArray.indexOf(requestId), 1);
           },
-          'test-channel',
-        ),
-      );
-      responseIdArray.push(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
+          channel: 'test-channel',
+        });
+
+        requestManager.on('error', {
+          callback: (error) => {
+            reject(error);
           },
-          'test-channel',
-        ),
-      );
+        });
 
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({ verb: 'GET', url: '/' });
-      await requestManager.request({
-        verb: 'POST',
-        url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+        void (async () => {
+          try {
+            responseIdArray.push(
+              requestManager.requestStream(
+                { verb: 'GET', url: '/', body: '' },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                { verb: 'GET', url: '/', body: '' },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                {
+                  verb: 'POST',
+                  url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+                  body: '{}',
+                },
+                'test-channel',
+              ),
+            );
+            responseIdArray.push(
+              requestManager.requestStream(
+                {
+                  verb: 'POST',
+                  url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+                  body: '{}',
+                },
+                'test-channel',
+              ),
+            );
+
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({ verb: 'GET', url: '/' });
+            await requestManager.request({
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+            });
+
+            await requestManager.requestBulk([
+              { verb: 'GET', url: '/' },
+              { verb: 'GET', url: '/' },
+              { verb: 'GET', url: '/' },
+              {
+                verb: 'POST',
+                url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              },
+            ]);
+
+            const t1 = Date.now();
+            expect(responseIdArray.length).toBe(0);
+            expect(t1 - t0).toBeGreaterThan(1600);
+            expect(t1 - t0).toBeLessThan(1800);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        })();
       });
-
-      await requestManager.requestBulk([
-        { verb: 'GET', url: '/' },
-        { verb: 'GET', url: '/' },
-        { verb: 'GET', url: '/' },
-        {
-          verb: 'POST',
-          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-        },
-      ]);
-
-      const t1 = Date.now();
-      expect(responseIdArray.length).toBe(0);
-      expect(t1 - t0).toBeGreaterThan(1600);
-      expect(t1 - t0).toBeLessThan(1800);
     });
   });
   // it('Burst size respected', async () => {

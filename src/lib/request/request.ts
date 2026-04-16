@@ -110,11 +110,6 @@ const makeSnykRequest = async (
     error.config.headers.Authorization = '****';
     return Promise.reject(error);
   });
-  // sanitize error to avoid leaking sensitive data
-  apiClient.interceptors.response.use(undefined, async (error) => {
-    error.config.headers.Authorization = '****';
-    return Promise.reject(error);
-  });
 
   try {
     let res;
