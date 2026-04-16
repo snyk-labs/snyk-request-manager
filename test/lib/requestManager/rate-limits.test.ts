@@ -1,6 +1,6 @@
 import { requestsManager } from '../../../src/lib/request/requestManager';
 import * as fs from 'fs';
-import * as nock from 'nock';
+import nock from 'nock';
 import * as path from 'path';
 
 const fixturesFolderPath = path.resolve(__dirname, '../..') + '/fixtures/';
@@ -24,7 +24,7 @@ beforeAll(() => {
     .post(/\/apiautherror/)
     .reply(401, '401')
     .post(/^(?!.*xyz).*$/)
-    .reply(200, (uri, requestBody) => {
+    .reply(200, (uri: string, requestBody: string) => {
       switch (uri) {
         case '/v1/':
           return requestBody;
@@ -41,7 +41,7 @@ beforeAll(() => {
       return 'dummypath slowed down';
     })
     .get(/^(?!.*xyz).*$/)
-    .reply(200, (uri) => {
+    .reply(200, (uri: string) => {
       switch (uri) {
         case '/v1/':
           return fs.readFileSync(

@@ -1,8 +1,8 @@
 import * as chalk from 'chalk';
-import debugModule = require('debug');
+import debugFactory from 'debug';
 
 const handleError = (error: Error): void => {
-  const debug = debugModule('snyk');
+  const debug = debugFactory('snyk');
   if (!process.env.DEBUG) {
     console.log(chalk.hex('#316fcc')('hint: Check debug mode -d'));
   }

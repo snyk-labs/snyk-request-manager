@@ -1,5 +1,5 @@
-const Configstore = require('@snyk/configstore');
-
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- CJS package without bundled types
+import Configstore = require('@snyk/configstore');
 import { LeakyBucketQueue } from 'leaky-bucket-queue';
 import { SnykRequest, makeSnykRequest, DEFAULT_API } from './request';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,7 +12,7 @@ interface QueuedRequest {
   snykRequest: SnykRequest;
 }
 interface QueueCallbackListenerBundle {
-  callback(requestId: string, data: any): void;
+  callback(requestId: string, data: unknown): void;
   channel?: string;
 }
 enum eventType {
@@ -23,7 +23,7 @@ interface ResponseEvent {
   eventType: eventType;
   channel: string;
   requestId: string;
-  data: any;
+  data: unknown;
 }
 
 interface RequestsManagerParams {
@@ -51,19 +51,21 @@ function getOauthToken(): string {
 }
 
 const getConfig = (): { endpoint: string; token: string } => {
-  const snykApiEndpoint: string =
+  const rawEndpoint =
     process.env.SNYK_API ||
     new Configstore('snyk').get('endpoint') ||
     DEFAULT_API;
+  const snykApiEndpoint =
+    typeof rawEndpoint === 'string' ? rawEndpoint : String(rawEndpoint ?? '');
+  const rawToken = process.env.SNYK_TOKEN || new Configstore('snyk').get('api');
   const snykToken =
-    process.env.SNYK_TOKEN || new Configstore('snyk').get('api');
+    typeof rawToken === 'string' ? rawToken : String(rawToken ?? '');
   return { endpoint: snykApiEndpoint, token: snykToken };
 };
 
 class RequestsManager {
   _requestsQueue: LeakyBucketQueue<QueuedRequest>;
-  // TODO: Type _events rather than plain obscure object structure
-  _events: any;
+  _events: Record<string, QueueCallbackListenerBundle[]>;
   _userConfig: {
     endpoint: string;
     token: string;
@@ -144,13 +146,13 @@ class RequestsManager {
       }
     } catch (err) {
       const overloadedError = requestsManagerError.requestsManagerErrorOverload(
-        err,
+        err as Error,
         request.channel,
         requestId,
       );
       const alreadyRetriedCount = this._retryCounter.get(requestId) || 0;
       if (
-        err?.name === 'NotFoundError' ||
+        (err instanceof Error && err.name === 'NotFoundError') ||
         alreadyRetriedCount >= this._MAX_RETRY_COUNT
       ) {
         this._emit({
@@ -216,12 +218,12 @@ class RequestsManager {
     return dataEventListeners.some((listener) => listener.channel == channel);
   };
 
-  request = (request: SnykRequest): Promise<any> => {
+  request = (request: SnykRequest): Promise<unknown> => {
     return new Promise((resolve, reject) => {
       const syncRequestChannel = uuidv4();
 
       const callbackBundle = {
-        callback: (originalRequestId: string, data: any) => {
+        callback: (originalRequestId: string, data: unknown) => {
           // TODO: double check this is ok
 
           if (requestId == originalRequestId) {
@@ -232,7 +234,7 @@ class RequestsManager {
         channel: syncRequestChannel,
       };
       const errorCallbackBundle = {
-        callback: (originalRequestId: string, data: any) => {
+        callback: (originalRequestId: string, data: unknown) => {
           // TODO: double check this is ok
 
           if (requestId == originalRequestId) {
@@ -249,34 +251,34 @@ class RequestsManager {
     });
   };
 
-  requestBulk = (
-    snykRequestsArray: Array<SnykRequest>,
-  ): Promise<Array<Record<string, any>>> => {
+  requestBulk = (snykRequestsArray: Array<SnykRequest>): Promise<unknown[]> => {
     return new Promise((resolve, reject) => {
       // Fire off all requests in Array and return only when responses are all returned
       // Must return array of responses in the same order.
-      const requestsMap: Map<string, any> = new Map();
+      const requestsMap: Map<string, unknown> = new Map();
       const bulkRequestChannel = uuidv4();
       let isErrorInAtLeastOneRequest = false;
       let requestRemainingCount = snykRequestsArray.length;
       const callbackBundle = {
-        callback: (originalRequestId: string, data: any) => {
+        callback: (originalRequestId: string, data: unknown) => {
           requestsMap.set(originalRequestId, data);
           requestRemainingCount--;
           if (requestRemainingCount <= 0) {
-            const responsesArray: Array<Record<string, any>> = [];
+            const responsesArray: unknown[] = [];
             requestsMap.forEach((value) => {
               responsesArray.push(value);
             });
-            isErrorInAtLeastOneRequest
-              ? reject(responsesArray)
-              : resolve(responsesArray);
+            if (isErrorInAtLeastOneRequest) {
+              reject(responsesArray);
+            } else {
+              resolve(responsesArray);
+            }
           }
         },
         channel: bulkRequestChannel,
       };
       const errorCallbackBundle = {
-        callback: (originalRequestId: string, data: any) => {
+        callback: (originalRequestId: string, data: unknown) => {
           isErrorInAtLeastOneRequest = true;
           callbackBundle.callback(originalRequestId, data);
         },

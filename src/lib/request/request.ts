@@ -1,4 +1,5 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, isAxiosError } from 'axios';
+import type { Module } from 'module';
 import * as Error from '../customErrors/apiError';
 
 // Fixes issue https://github.com/axios/axios/issues/3384
@@ -12,7 +13,7 @@ interface SnykRequest {
   verb: string;
   url: string;
   body?: string;
-  headers?: Record<string, any>;
+  headers?: Record<string, string>;
   requestId?: string;
   useRESTApi?: boolean;
 }
@@ -27,7 +28,7 @@ if (process.env.NP_PROXY || process.env.no_proxy) {
   process.env.NO_PROXY = process.env.NO_PROXY || process.env.no_proxy;
 }
 
-const getTopParentModuleName = (parent: NodeModule | null): string => {
+const getTopParentModuleName = (parent: Module | null | undefined): string => {
   if (parent == null) {
     return '';
   }
@@ -46,14 +47,14 @@ const makeSnykRequest = async (
   apiUrl = DEFAULT_API,
   apiUrlREST = DEFAULT_REST_API,
   userAgentPrefix = '',
-): Promise<AxiosResponse<any>> => {
+): Promise<AxiosResponse<unknown>> => {
   const proxyUri = getProxyForUrl(request.useRESTApi ? apiUrlREST : apiUrl);
   if (proxyUri) {
     bootstrap({
       environmentVariableNamespace: '',
     });
   }
-  const topParentModuleName = getTopParentModuleName(module.parent as any);
+  const topParentModuleName = getTopParentModuleName(module.parent);
   const userAgentPrefixChecked =
     userAgentPrefix != '' && !userAgentPrefix.endsWith('/')
       ? userAgentPrefix + '/'
@@ -66,7 +67,7 @@ const makeSnykRequest = async (
       ? `Bearer ${oauthBearerToken}`
       : '';
 
-  const requestHeaders: Record<string, any> = {
+  const requestHeaders: Record<string, string> = {
     'Content-Type':
       request.useRESTApi && request.body
         ? 'application/vnd.api+json'
@@ -138,6 +139,9 @@ const makeSnykRequest = async (
     }
     return res;
   } catch (err) {
+    if (!isAxiosError(err)) {
+      throw new Error.GenericError(err);
+    }
     switch (err.response?.status) {
       case 401:
         throw new Error.ApiAuthenticationError(err);

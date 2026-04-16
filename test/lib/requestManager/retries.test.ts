@@ -1,6 +1,7 @@
 import { requestsManager } from '../../../src/lib/request/requestManager';
 import * as fs from 'fs';
-import * as nock from 'nock';
+import type { AxiosResponse } from 'axios';
+import nock from 'nock';
 import * as path from 'path';
 import { RequestsManagerApiError } from '../../../src/lib/customErrors/requestManagerErrors';
 
@@ -22,10 +23,10 @@ describe('Testing Request Retries', () => {
       });
 
     try {
-      const response = await requestManager.request({
+      const response = (await requestManager.request({
         verb: 'POST',
         url: '/apierror',
-      });
+      })) as AxiosResponse<unknown>;
       expect(response.data).toEqual(
         JSON.parse(
           fs
@@ -60,10 +61,10 @@ describe('Testing Request Retries', () => {
       });
 
     try {
-      const response = await requestManager.request({
+      const response = (await requestManager.request({
         verb: 'POST',
         url: '/apierror',
-      });
+      })) as AxiosResponse<unknown>;
       expect(response.data).toEqual(
         JSON.parse(
           fs
@@ -101,10 +102,10 @@ describe('Testing Request Retries', () => {
       });
 
     try {
-      const response = await requestManager.request({
+      const response = (await requestManager.request({
         verb: 'POST',
         url: '/apierror',
-      });
+      })) as AxiosResponse<unknown>;
       expect(response.data).toThrowError();
     } catch (err) {
       expect(err).toBeInstanceOf(RequestsManagerApiError);
