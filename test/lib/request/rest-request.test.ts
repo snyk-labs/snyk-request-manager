@@ -1,7 +1,6 @@
 import { makeSnykRequest } from '../../../src/lib/request/request';
 import * as fs from 'fs';
-import * as nock from 'nock';
-import * as _ from 'lodash';
+import nock from 'nock';
 import * as path from 'path';
 import axios from 'axios';
 
@@ -19,9 +18,12 @@ beforeEach(() => {
     .get(/\/xyz/)
     .reply(404, '404')
     .get(/\/customtoken/)
-    .reply(200, function() {
-      return this.req.headers.authorization;
-    })
+    .reply(
+      200,
+      function (this: { req: { headers: { authorization?: string } } }) {
+        return this.req.headers.authorization;
+      },
+    )
     .post(/\/xyz/)
     .reply(404, '404')
     .get(/\/apierror/)
@@ -40,7 +42,7 @@ beforeEach(() => {
     .post(/\/apiautherror/)
     .reply(401, '401')
     .post(/^(?!.*xyz).*$/)
-    .reply(200, (uri, requestBody) => {
+    .reply(200, (uri: string, requestBody: string) => {
       switch (uri) {
         case '/rest/':
           return requestBody;
@@ -49,7 +51,7 @@ beforeEach(() => {
       }
     })
     .patch(/^(?!.*xyz).*$/)
-    .reply(200, (uri, requestBody) => {
+    .reply(200, (uri: string, requestBody: string) => {
       switch (uri) {
         case '/rest/':
           return requestBody;
@@ -58,7 +60,7 @@ beforeEach(() => {
       }
     })
     .get(/^(?!.*xyz).*$/)
-    .reply(200, (uri) => {
+    .reply(200, (uri: string) => {
       switch (uri) {
         case '/rest/':
           return fs.readFileSync(

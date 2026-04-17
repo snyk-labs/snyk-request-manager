@@ -1,4 +1,4 @@
-import * as debugModule from 'debug';
+import debugFactory from 'debug';
 
 import {
   ApiError,
@@ -6,7 +6,7 @@ import {
   NotFoundError,
   GenericError,
 } from './apiError';
-const debug = debugModule('snyk');
+const debug = debugFactory('snyk');
 
 class RequestsManagerApiError extends ApiError {
   channel: string;

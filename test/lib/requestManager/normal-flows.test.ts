@@ -2,9 +2,10 @@ import {
   getConfig,
   requestsManager,
 } from '../../../src/lib/request/requestManager';
+import type { AxiosResponse } from 'axios';
 import * as fs from 'fs';
-import * as nock from 'nock';
-import * as _ from 'lodash';
+import isEqual from 'lodash/isEqual';
+import nock from 'nock';
 import * as path from 'path';
 import { RequestsManagerNotFoundError } from '../../../src/lib/customErrors/requestManagerErrors';
 
@@ -13,9 +14,12 @@ beforeAll(() => {
   return nock('https://api.snyk.io')
     .persist()
     .get(/\/customtoken/)
-    .reply(200, function() {
-      return this.req.headers.authorization;
-    })
+    .reply(
+      200,
+      function (this: { req: { headers: { authorization?: string } } }) {
+        return this.req.headers.authorization;
+      },
+    )
     .get(/\/xyz/)
     .reply(404, '404')
     .post(/\/xyz/)
@@ -86,7 +90,9 @@ describe('Testing Request Flows', () => {
           .toString(),
       );
 
-      expect(_.isEqual(responseSync.data, fixturesJSON)).toBeTruthy();
+      expect(
+        isEqual((responseSync as AxiosResponse<unknown>).data, fixturesJSON),
+      ).toBeTruthy();
     } catch (err) {
       throw new Error(err);
     }
@@ -108,8 +114,12 @@ describe('Testing Request Flows', () => {
           .toString(),
       );
 
-      expect(_.isEqual(responseSync1.data, fixturesJSON)).toBeTruthy();
-      expect(_.isEqual(responseSync2.data, fixturesJSON)).toBeTruthy();
+      expect(
+        isEqual((responseSync1 as AxiosResponse<unknown>).data, fixturesJSON),
+      ).toBeTruthy();
+      expect(
+        isEqual((responseSync2 as AxiosResponse<unknown>).data, fixturesJSON),
+      ).toBeTruthy();
     } catch (err) {
       console.log(err);
       throw new Error(err);
@@ -128,12 +138,11 @@ describe('Testing Request Flows', () => {
     try {
       // dummypath is slowed down 1sec to verify that the response array respect the order of request
       // waits for all request to be done and return an array of response in the same order.
-      const results: Array<any> = await requestManager.requestBulk([
+      const results: unknown[] = await requestManager.requestBulk([
         { verb: 'GET', url: '/dummypath' },
         {
           verb: 'POST',
-          url:
-            '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
           body: '{}',
         },
         { verb: 'GET', url: '/' },
@@ -149,9 +158,15 @@ describe('Testing Request Flows', () => {
           .toString(),
       );
 
-      expect(results[0].data).toEqual('dummypath slowed down');
-      expect(_.isEqual(results[2].data, fixturesJSON1)).toBeTruthy();
-      expect(_.isEqual(results[1].data, fixturesJSON2)).toBeTruthy();
+      expect((results[0] as AxiosResponse<unknown>).data).toEqual(
+        'dummypath slowed down',
+      );
+      expect(
+        isEqual((results[2] as AxiosResponse<unknown>).data, fixturesJSON1),
+      ).toBeTruthy();
+      expect(
+        isEqual((results[1] as AxiosResponse<unknown>).data, fixturesJSON2),
+      ).toBeTruthy();
     } catch (resultsWithError) {
       console.log(resultsWithError);
     }
@@ -165,24 +180,28 @@ describe('Testing Request Flows', () => {
         { verb: 'GET', url: '/dummypath' },
         {
           verb: 'POST',
-          url:
-            '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+          url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
           body: '{}',
         },
       ]);
-    } catch (resultsWithError) {
+    } catch (resultsWithError: unknown) {
       const fixturesJSON2 = JSON.parse(
         fs
           .readFileSync(fixturesFolderPath + 'apiResponses/projectIssues.json')
           .toString(),
       );
-      expect(_.isEqual(resultsWithError[2].data, fixturesJSON2)).toBeTruthy();
-      expect(resultsWithError[1].data).toEqual('dummypath slowed down');
-      expect(resultsWithError[0]).toBeInstanceOf(RequestsManagerNotFoundError);
+      const errArr = resultsWithError as unknown[];
+      expect(
+        isEqual((errArr[2] as AxiosResponse<unknown>).data, fixturesJSON2),
+      ).toBeTruthy();
+      expect((errArr[1] as AxiosResponse<unknown>).data).toEqual(
+        'dummypath slowed down',
+      );
+      expect(errArr[0]).toBeInstanceOf(RequestsManagerNotFoundError);
     }
   });
 
-  it('Request Stream request return as soon as done', async (done) => {
+  it('Request Stream request return as soon as done', async () => {
     const responseMap = new Map();
 
     const expectedResponse = [
@@ -204,62 +223,65 @@ describe('Testing Request Flows', () => {
       ),
     ];
 
-    requestManager.on('data', {
-      callback: (requestId, data) => {
-        responseMap.set(requestId, data);
+    await new Promise<void>((resolve, reject) => {
+      requestManager.on('data', {
+        callback: (requestId, data: unknown) => {
+          responseMap.set(requestId, data);
 
-        if (
-          Array.from(responseMap.values()).filter((value) => value != '')
-            .length == 3
-        ) {
-          try {
-            Array.from(responseMap.values()).forEach((response, index) => {
-              expect(response.data).toEqual(expectedResponse[index]);
-            });
-            done();
-          } catch (err) {
-            done(err);
+          if (
+            Array.from(responseMap.values()).filter((value) => value != '')
+              .length == 3
+          ) {
+            try {
+              Array.from(responseMap.values()).forEach((response, index) => {
+                expect((response as AxiosResponse<unknown>).data).toEqual(
+                  expectedResponse[index],
+                );
+              });
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
           }
-        }
-      },
-      channel: 'test-channel',
-    });
-    requestManager.on('error', {
-      callback: () => {
-        done.fail();
-      },
-    });
+        },
+        channel: 'test-channel',
+      });
+      requestManager.on('error', {
+        callback: (error) => {
+          reject(error);
+        },
+      });
 
-    try {
-      responseMap.set(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/', body: '' },
-          'test-channel',
-        ),
-        '',
-      );
-      responseMap.set(
-        requestManager.requestStream(
-          { verb: 'GET', url: '/dummypath', body: '' },
-          'test-channel',
-        ),
-        '',
-      );
-      responseMap.set(
-        requestManager.requestStream(
-          {
-            verb: 'POST',
-            url:
-              '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
-            body: '{}',
-          },
-          'test-channel',
-        ),
-        '',
-      );
-    } catch (err) {
-      console.log(err);
-    }
+      try {
+        responseMap.set(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/', body: '' },
+            'test-channel',
+          ),
+          '',
+        );
+        responseMap.set(
+          requestManager.requestStream(
+            { verb: 'GET', url: '/dummypath', body: '' },
+            'test-channel',
+          ),
+          '',
+        );
+        responseMap.set(
+          requestManager.requestStream(
+            {
+              verb: 'POST',
+              url: '/org/334e0c45-5d3d-40f6-b882-ae82a164b317/project/0bbbfee1-2138-4322-80d4-4166d1259ae5/issues',
+              body: '{}',
+            },
+            'test-channel',
+          ),
+          '',
+        );
+      } catch (err) {
+        reject(err);
+      }
+    });
   });
 });
 
@@ -272,7 +294,9 @@ describe('Testing Request Flows', () => {
         url: '/customtoken',
       });
 
-      expect(responseSync.data).toEqual('token 0987654321');
+      expect((responseSync as AxiosResponse<unknown>).data).toEqual(
+        'token 0987654321',
+      );
     } catch (err) {
       throw new Error(err);
     }
@@ -286,7 +310,9 @@ describe('Testing Request Flows', () => {
         verb: 'GET',
         url: '/customtoken',
       });
-      expect(responseSync.data).toEqual('token 123');
+      expect((responseSync as AxiosResponse<unknown>).data).toEqual(
+        'token 123',
+      );
     } catch (err) {
       throw new Error(err);
     }

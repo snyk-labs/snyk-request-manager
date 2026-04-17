@@ -8,6 +8,7 @@
     "declaration": true,
     "importHelpers": true,
     "strict": true,
+    "esModuleInterop": true,
     "useUnknownInCatchVariables": false
   },
   "include": ["./src/lib/**/*"]
