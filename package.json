@@ -46,7 +46,7 @@
     "snyk-config": "^5.0.1",
     "source-map-support": "^0.5.16",
     "tslib": "^1.10.0",
-    "uuid": "^8.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@types/global-agent": "^2.1.1",
