@@ -2,7 +2,7 @@
 import Configstore = require('@snyk/configstore');
 import { LeakyBucketQueue } from 'leaky-bucket-queue';
 import { SnykRequest, makeSnykRequest, DEFAULT_API } from './request';
-import { v4 as uuidv4 } from 'uuid';
+import { randomBytes, randomUUID } from 'crypto';
 import { URL } from 'url';
 import * as requestsManagerError from '../customErrors/requestManagerErrors';
 
@@ -62,6 +62,15 @@ const getConfig = (): { endpoint: string; token: string } => {
     typeof rawToken === 'string' ? rawToken : String(rawToken ?? '');
   return { endpoint: snykApiEndpoint, token: snykToken };
 };
+
+function createRequestId(): string {
+  if (typeof randomUUID === 'function') {
+    return randomUUID();
+  }
+
+  // Keep compatibility with older runtimes that do not expose crypto.randomUUID.
+  return randomBytes(16).toString('hex');
+}
 
 class RequestsManager {
   _requestsQueue: LeakyBucketQueue<QueuedRequest>;
@@ -220,7 +229,7 @@ class RequestsManager {
 
   request = (request: SnykRequest): Promise<unknown> => {
     return new Promise((resolve, reject) => {
-      const syncRequestChannel = uuidv4();
+      const syncRequestChannel = createRequestId();
 
       const callbackBundle = {
         callback: (originalRequestId: string, data: unknown) => {
@@ -256,7 +265,7 @@ class RequestsManager {
       // Fire off all requests in Array and return only when responses are all returned
       // Must return array of responses in the same order.
       const requestsMap: Map<string, unknown> = new Map();
-      const bulkRequestChannel = uuidv4();
+      const bulkRequestChannel = createRequestId();
       let isErrorInAtLeastOneRequest = false;
       let requestRemainingCount = snykRequestsArray.length;
       const callbackBundle = {
@@ -302,7 +311,7 @@ class RequestsManager {
     channel = 'stream',
     id = '',
   ): string => {
-    const requestId = id ? id : uuidv4();
+    const requestId = id ? id : createRequestId();
     const requestForQueue: QueuedRequest = {
       id: requestId,
       channel: channel,
