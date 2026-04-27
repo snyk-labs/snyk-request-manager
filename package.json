@@ -35,8 +35,7 @@
     "@snyk/configstore": "^3.2.0-rc1",
     "@types/babel__traverse": "7.17.1",
     "@types/debug": "^4.1.7",
-    "@types/uuid": "^7.0.3",
-    "axios": "1.15.0",
+    "axios": "1.15.2",
     "chalk": "^4.0.0",
     "debug": "^4.1.1",
     "global-agent": "3.0.0",
@@ -45,8 +44,7 @@
     "proxy-from-env": "^1.1.0",
     "snyk-config": "^5.0.1",
     "source-map-support": "^0.5.16",
-    "tslib": "^1.10.0",
-    "uuid": "^8.0.0"
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
     "@types/global-agent": "^2.1.1",
@@ -66,6 +64,9 @@
     "tsc-watch": "^6.3.1",
     "typescript": "^4.7.4",
     "typescript-eslint": "^8.48.1"
+  },
+  "overrides": {
+    "follow-redirects": "^1.16.0"
   },
   "pkg": {
     "scripts": [
