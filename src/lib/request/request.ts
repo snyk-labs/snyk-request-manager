@@ -1,5 +1,6 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios';
 import type { Module } from 'module';
+import { PACKAGE_VERSION } from '../packageVersion';
 import * as Error from '../customErrors/apiError';
 
 // Fixes issue https://github.com/axios/axios/issues/3384
@@ -73,7 +74,7 @@ const makeSnykRequest = async (
         ? 'application/vnd.api+json'
         : 'application/json',
     Authorization: authorizationToken,
-    'User-Agent': `${topParentModuleName}${userAgentPrefixChecked}tech-services/snyk-request-manager/1.0`,
+    'User-Agent': `${topParentModuleName}${userAgentPrefixChecked}tech-services/snyk-request-manager/${PACKAGE_VERSION}`,
   };
   let apiClient;
   if (proxyUri) {

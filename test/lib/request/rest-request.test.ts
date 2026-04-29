@@ -12,6 +12,12 @@ import {
 } from '../../../src/lib/customErrors/apiError';
 
 const fixturesFolderPath = path.resolve(__dirname, '../..') + '/fixtures/';
+
+const PACKAGE_JSON_VERSION = (
+  JSON.parse(
+    fs.readFileSync(path.join(__dirname, '../../../package.json'), 'utf8'),
+  ) as { version: string }
+).version;
 beforeEach(() => {
   return nock('https://api.snyk.io')
     .persist()
@@ -102,7 +108,7 @@ describe('Test Snyk Utils make request properly', () => {
       headers: {
         Authorization: 'token token123',
         'Content-Type': 'application/json',
-        'User-Agent': 'tech-services/snyk-request-manager/1.0',
+        'User-Agent': `tech-services/snyk-request-manager/${PACKAGE_JSON_VERSION}`,
       },
       responseType: 'json',
       timeout: 30000,
@@ -130,7 +136,7 @@ describe('Test Snyk Utils make request properly', () => {
       headers: {
         Authorization: 'token token123',
         'Content-Type': 'application/vnd.api+json',
-        'User-Agent': 'tech-services/snyk-request-manager/1.0',
+        'User-Agent': `tech-services/snyk-request-manager/${PACKAGE_JSON_VERSION}`,
       },
       responseType: 'json',
       timeout: 30000,
@@ -158,7 +164,7 @@ describe('Test Snyk Utils make request properly', () => {
       headers: {
         Authorization: 'token token123',
         'Content-Type': 'application/vnd.api+json',
-        'User-Agent': 'tech-services/snyk-request-manager/1.0',
+        'User-Agent': `tech-services/snyk-request-manager/${PACKAGE_JSON_VERSION}`,
       },
       responseType: 'json',
       timeout: 30000,

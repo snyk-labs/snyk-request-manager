@@ -1,5 +1,6 @@
 {
   "name": "snyk-request-manager",
+  "version": "1.9.2",
   "description": "Rate controlled and retry enabled request manager to interact with Snyk APIs",
   "main": "dist/index.js",
   "scripts": {
