@@ -4,6 +4,7 @@ import { LeakyBucketQueue } from 'leaky-bucket-queue';
 import { SnykRequest, makeSnykRequest, DEFAULT_API } from './request';
 import { randomBytes, randomUUID } from 'crypto';
 import { URL } from 'url';
+import type { AxiosResponse } from 'axios';
 import * as requestsManagerError from '../customErrors/requestManagerErrors';
 
 interface QueuedRequest {
@@ -227,7 +228,8 @@ class RequestsManager {
     return dataEventListeners.some((listener) => listener.channel == channel);
   };
 
-  request = (request: SnykRequest): Promise<unknown> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- default preserves pre-generics behavior for existing consumers
+  request = <T = any>(request: SnykRequest): Promise<AxiosResponse<T>> => {
     return new Promise((resolve, reject) => {
       const syncRequestChannel = createRequestId();
 
@@ -237,7 +239,7 @@ class RequestsManager {
 
           if (requestId == originalRequestId) {
             this._removeAllListenersForChannel(syncRequestChannel);
-            resolve(data);
+            resolve(data as AxiosResponse<T>);
           }
         },
         channel: syncRequestChannel,
@@ -260,7 +262,10 @@ class RequestsManager {
     });
   };
 
-  requestBulk = (snykRequestsArray: Array<SnykRequest>): Promise<unknown[]> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- default preserves pre-generics behavior for existing consumers
+  requestBulk = <T = any>(
+    snykRequestsArray: Array<SnykRequest>,
+  ): Promise<AxiosResponse<T>[]> => {
     return new Promise((resolve, reject) => {
       // Fire off all requests in Array and return only when responses are all returned
       // Must return array of responses in the same order.
@@ -273,9 +278,9 @@ class RequestsManager {
           requestsMap.set(originalRequestId, data);
           requestRemainingCount--;
           if (requestRemainingCount <= 0) {
-            const responsesArray: unknown[] = [];
+            const responsesArray: AxiosResponse<T>[] = [];
             requestsMap.forEach((value) => {
-              responsesArray.push(value);
+              responsesArray.push(value as AxiosResponse<T>);
             });
             if (isErrorInAtLeastOneRequest) {
               reject(responsesArray);
