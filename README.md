@@ -70,6 +70,20 @@ const run = async () => {
 run()
 ```
 
+`request` and `requestBulk` are generic — if you know the shape of the endpoint you're calling, pass it as a type parameter to get a typed `.data` instead of `any`:
+
+```ts
+interface Project {
+    id: string;
+    name: string;
+}
+
+const requestSync = await requestManager.request<Project>({verb: "GET", url: '/org/:orgID/project/:projectId'})
+console.log(requestSync.data.name) // typed as string
+```
+
+This is entirely optional — omitting the type parameter keeps `.data` as `any`, exactly as before.
+
 ### 3 - Bulk requests burst
 
 Fire off you array of requests, await for all of them to complete to receive results in an Array in the same order.
@@ -182,4 +196,12 @@ const res = await requestManager.request({verb: "GET", url: '/url', useRESTApi: 
 ```
 const requestManager = new requestsManager({snykToken:'21346-1234-1234-1234', burstSize: 20, period: 100, maxRetryCount: 10})
 ```
+
+## Development
+
+### Running tests
+
+`npm test` runs lint and the full jest suite.
+
+Test runs force `SNYK_API=https://api.snyk.io/v1` via `test/jest.setup.js` so they're isolated from any real local Snyk CLI config. Without this, if you've ever run `snyk auth` or `snyk config set endpoint` on your machine, `getConfig()` picks up the `endpoint` stored in `~/.config/configstore/snyk.json` instead of the library's default — which can differ just enough (e.g. missing the `/v1` suffix) to make requests miss the tests' nock mocks and silently fall through to the wrong interceptor, producing confusing failures that don't reproduce in CI or on a clean machine.
 

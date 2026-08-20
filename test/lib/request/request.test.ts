@@ -229,7 +229,7 @@ describe('Test Snyk Utils error handling/classification', () => {
       expect(err).toBeInstanceOf(GenericError);
       expect(err.message.config.headers.Authorization).toBe('****');
     }
-  });
+  }, 35_000); // mock delays 32s to exceed makeSnykRequest's 30s axios timeout
 });
 
 describe('Test makeSnykRequest with oauthBearerToken', () => {
