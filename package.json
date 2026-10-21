@@ -1,6 +1,6 @@
 {
   "name": "snyk-request-manager",
-  "version": "1.9.4",
+  "version": "1.9.5",
   "description": "Rate controlled and retry enabled request manager to interact with Snyk APIs",
   "main": "dist/index.js",
   "scripts": {
@@ -36,7 +36,7 @@
     "@snyk/configstore": "^3.2.0-rc1",
     "@types/babel__traverse": "7.17.1",
     "@types/debug": "^4.1.7",
-    "axios": "1.18.0",
+    "axios": "1.20.0",
     "chalk": "^4.0.0",
     "debug": "^4.1.1",
     "global-agent": "3.0.0",
@@ -67,7 +67,7 @@
     "typescript-eslint": "^8.48.1"
   },
   "overrides": {
-    "follow-redirects": "^1.16.0"
+    "follow-redirects": "^1.16.1"
   },
   "pkg": {
     "scripts": [
