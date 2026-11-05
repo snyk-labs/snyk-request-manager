@@ -60,6 +60,7 @@
     "jest": "^29.7.0",
     "nock": "^14.0.17",
     "prettier": "^3.7.4",
+    "semantic-release": "25.0.9",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "tsc-watch": "^6.3.1",
@@ -68,11 +69,6 @@
   },
   "overrides": {
     "follow-redirects": "^1.16.1"
-  },
-  "pkg": {
-    "scripts": [
-      "dist/**/*.js"
-    ]
   },
   "release": {
     "branches": [
